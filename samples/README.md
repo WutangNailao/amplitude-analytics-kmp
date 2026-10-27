@@ -110,10 +110,10 @@ These samples are designed to demonstrate API compatibility. If you're migrating
 2. On Android, change `androidContext` in Configuration
 3. All other code remains identical!
 
-See [Migration Guide](../README.md#migration-from-android-sdk) for details.
+See [Migration Guide](../docs/usage.md#migration-from-android-sdk) for details.
 
 ## Additional Resources
 
-- [Amplitude KMP SDK Documentation](../README.md)
+- [Amplitude KMP SDK Usage Guide](../docs/usage.md)
 - [Android Sample README](kotlin-kmp-app/README.md)
 - [Amplitude Developer Docs](https://www.docs.developers.amplitude.com/)

@@ -319,7 +319,7 @@ All the rest of the code remains identical!
 
 ## Resources
 
-- [Main SDK Documentation](../../README.md)
+- [Main SDK Usage Guide](../../docs/usage.md)
 - [iOS Sample README](../kotlin-kmp-app-ios/README.md)
 - [Amplitude Developer Center](https://www.docs.developers.amplitude.com/)
 - [Kotlin Multiplatform Documentation](https://kotlinlang.org/docs/multiplatform.html)

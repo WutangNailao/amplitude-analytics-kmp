@@ -1,5 +1,7 @@
 # Known Limitations
 
+[Project overview](../README.md) · [Usage guide](usage.md)
+
 ## iOS custom plugin property loss
 
 > **Warning:** Custom KMP plugins registered with `amplitude.add(plugin)` can cause event
