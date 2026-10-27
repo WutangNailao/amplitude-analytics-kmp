@@ -2,9 +2,11 @@ package com.amplitude.kmp
 
 import cocoapods.AmplitudeSwift.AMPConfiguration
 import cocoapods.AmplitudeSwift.AMPIdentify
+import cocoapods.AmplitudeSwift.AMPPlugin
 import com.amplitude.kmp.events.*
 import com.amplitude.kmp.mappings.ios.*
 import com.amplitude.kmp.plugins.Plugin
+import com.amplitude.kmp.utils.Lock
 import kotlinx.cinterop.ExperimentalForeignApi
 import cocoapods.AmplitudeSwift.Amplitude as IOSAmplitude
 
@@ -28,6 +30,9 @@ import cocoapods.AmplitudeSwift.Amplitude as IOSAmplitude
 public actual class Amplitude internal constructor(
     private val iosAmplitude: IOSAmplitude,
 ) {
+    private val pluginLock = Lock()
+    private val pluginAdapters = mutableListOf<Pair<Plugin, AMPPlugin>>()
+
     public actual companion object {
         private var _instance: Amplitude? = null
 
@@ -267,12 +272,20 @@ public actual class Amplitude internal constructor(
     // ========================================
 
     public actual fun add(plugin: Plugin): Amplitude {
-        iosAmplitude.add(plugin = plugin.toIOSPlugin())
+        val adapter = pluginLock.withLock {
+            if (pluginAdapters.any { it.first === plugin }) return this
+            plugin.toIOSPlugin(this).also { pluginAdapters.add(plugin to it) }
+        }
+        iosAmplitude.add(plugin = adapter)
         return this
     }
 
     public actual fun remove(plugin: Plugin): Amplitude {
-        iosAmplitude.remove(plugin = plugin.toIOSPlugin())
+        val adapter = pluginLock.withLock {
+            val index = pluginAdapters.indexOfFirst { it.first === plugin }
+            if (index < 0) null else pluginAdapters.removeAt(index).second
+        }
+        adapter?.let { iosAmplitude.remove(plugin = it) }
         return this
     }
 

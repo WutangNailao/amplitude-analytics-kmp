@@ -8,7 +8,10 @@ import com.amplitude.kmp.Amplitude
 /**
  * Wrapper to adapt KMP Plugin to Android SDK Plugin.
  */
-internal class KmpPluginAdapter(private val kmpPlugin: Plugin) : AndroidPlugin {
+internal class KmpPluginAdapter(
+    private val kmpPlugin: Plugin,
+    private val kmpAmplitude: Amplitude,
+) : AndroidPlugin {
     override lateinit var amplitude: com.amplitude.core.Amplitude
 
     override val type: AndroidPlugin.Type
@@ -16,9 +19,7 @@ internal class KmpPluginAdapter(private val kmpPlugin: Plugin) : AndroidPlugin {
 
     override fun setup(amplitude: com.amplitude.core.Amplitude) {
         this.amplitude = amplitude
-        // Convert Android Amplitude to KMP Amplitude for setup
-        // Note: This requires access to the KMP Amplitude wrapper instance
-        // For now, we'll skip the setup conversion as it's rarely used
+        kmpPlugin.setup(kmpAmplitude)
     }
 
     override fun execute(event: AndroidBaseEvent): AndroidBaseEvent? {
@@ -80,8 +81,8 @@ internal class KmpPluginAdapter(private val kmpPlugin: Plugin) : AndroidPlugin {
 /**
  * Map KMP Plugin to Android Plugin.
  */
-internal fun Plugin.toAndroidPlugin(): AndroidPlugin {
-    return KmpPluginAdapter(this)
+internal fun Plugin.toAndroidPlugin(amplitude: Amplitude): AndroidPlugin {
+    return KmpPluginAdapter(this, amplitude)
 }
 
 /**

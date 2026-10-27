@@ -239,6 +239,7 @@ public expect class Amplitude {
 
     /**
      * Add a plugin to the SDK.
+     * Adding the same plugin instance again has no effect until it is removed.
      *
      * @param plugin Plugin to add
      * @return this Amplitude instance for method chaining

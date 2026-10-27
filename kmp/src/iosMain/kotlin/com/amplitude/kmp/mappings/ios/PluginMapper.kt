@@ -20,7 +20,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
  * This avoids the complexity of implementing Swift protocols from Kotlin.
  */
 @OptIn(ExperimentalForeignApi::class)
-internal fun Plugin.toIOSPlugin(): AMPPlugin {
+internal fun Plugin.toIOSPlugin(amplitude: Amplitude): AMPPlugin {
     val kmpPlugin = this
 
     // Create execute closure that bridges KMP Plugin to iOS
@@ -85,6 +85,7 @@ internal fun Plugin.toIOSPlugin(): AMPPlugin {
     // Create the ObjCPlugin (AMPPlugin) using the static factory method
     return AMPPlugin.initWithType(
         type = type.toIOSPluginType(),
+        setup = { _ -> kmpPlugin.setup(amplitude) },
         execute = executeCallback
     )
 }
