@@ -427,6 +427,11 @@ suspend fun trackUserJourney() {
 
 ### Plugin System
 
+> **iOS warning:** Custom KMP plugins can lose event, user, and group properties,
+> even when they return the event unchanged. Avoid registering them on iOS when
+> those properties must be preserved. See [Known Limitations](docs/known-limitations.md#ios-custom-plugin-property-loss)
+> before using the example below on iOS.
+
 Extend functionality with custom plugins:
 
 ```kotlin
@@ -768,6 +773,9 @@ Amplitude(apiKey, activityContext)
 ```
 
 ## Known Issues & API Compatibility
+
+See [Known Limitations](docs/known-limitations.md) for the current iOS custom plugin
+property-loss limitation, its interoperability constraints, and recommended usage.
 
 See [API Compatibility Issues Report](../reports/api-compatibility-issues.md) for known issues and fixes in progress.
 
