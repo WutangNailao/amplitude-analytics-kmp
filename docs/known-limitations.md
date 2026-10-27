@@ -93,7 +93,28 @@ This limitation remains unresolved. A complete solution would require additional
 native bridge capabilities or a redesign of the KMP plugin adapter; this document
 does not introduce either change.
 
-### References
+## iOS callback event properties
+
+iOS event callbacks return a KMP event built from the actual native callback event,
+including its event type and readable fields such as user ID, device ID, timestamp,
+insert ID, and revenue fields. They do not return a placeholder event.
+
+However, `eventProperties`, `userProperties`, `groups`, and `groupProperties` remain
+`null` in the callback event. The same `AMPProperties` interface limitation described
+above prevents reconstructing these maps. This affects per-event callbacks and the
+global configuration callback, even when no custom KMP plugin is registered. The
+callback conversion does not itself remove properties from the event sent to the server.
+
+Use the event type or insert ID to identify the callback event. If the application
+needs the originally supplied properties in a per-event callback, retain them in
+the callback closure; they are the input properties, not a snapshot of the final
+native event after SDK processing.
+
+The native SDK declares the callback event as non-null. If an unexpected null event
+arrives through interop, the KMP callback is not invoked rather than receiving a
+fabricated event.
+
+## References
 
 - [Current KMP adapter](../kmp/src/iosMain/kotlin/com/amplitude/kmp/mappings/ios/PluginMapper.kt)
 - [Amplitude-Swift v1.16.2 Objective-C property wrapper](https://github.com/amplitude/Amplitude-Swift/blob/v1.16.2/Sources/Amplitude/ObjC/ObjCProperties.swift)

@@ -227,15 +227,60 @@ internal fun IngestionMetadata.toIOSIngestionMetadata(): AMPIngestionMetadata = 
 /**
  * Map KMP EventCallBack to iOS EventCallback.
  * Note: iOS EventCallback is a function type exposed by cinterop.
+ * Property maps cannot be reconstructed because AMPProperties does not expose its keys.
  */
 @OptIn(ExperimentalForeignApi::class)
 internal fun EventCallBack.toIOSCallback(): ((AMPBaseEvent?, Long, String?) -> Unit)? {
     // iOS EventCallback is a closure: (BaseEvent?, Int, String?) -> Void
     return { iosEvent: AMPBaseEvent?, status: Long, message: String? ->
-        // Create a dummy BaseEvent since we can't easily convert iOS event back to KMP
-        // The callback primarily cares about status and message
-        val dummyEvent = BaseEvent(eventType = "callback_event")
-        this(dummyEvent, status.toInt(), message ?: "")
+        // The native callback contract supplies a non-null event. Do not fabricate
+        // an event if an unexpected null arrives through the interop boundary.
+        if (iosEvent != null) {
+            val event = BaseEvent(eventType = iosEvent.eventType()).apply {
+                userId = iosEvent.userId()
+                deviceId = iosEvent.deviceId()
+                timestamp = iosEvent.timestamp().takeIf { it != -1L }
+                eventId = iosEvent.eventId().takeIf { it != -1L }
+                // -1 is also a valid session ID for out-of-session events.
+                sessionId = iosEvent.sessionId()
+                insertId = iosEvent.insertId()
+                locationLat = iosEvent.locationLat().takeIf { !it.isNaN() }
+                locationLng = iosEvent.locationLng().takeIf { !it.isNaN() }
+                appVersion = iosEvent.appVersion()
+                versionName = iosEvent.versionName()
+                platform = iosEvent.platform()
+                osName = iosEvent.osName()
+                osVersion = iosEvent.osVersion()
+                deviceBrand = iosEvent.deviceBrand()
+                deviceManufacturer = iosEvent.deviceManufacturer()
+                deviceModel = iosEvent.deviceModel()
+                carrier = iosEvent.carrier()
+                country = iosEvent.country()
+                region = iosEvent.region()
+                city = iosEvent.city()
+                dma = iosEvent.dma()
+                idfa = iosEvent.idfa()
+                idfv = iosEvent.idfv()
+                adid = iosEvent.adid()
+                language = iosEvent.language()
+                library = iosEvent.library()
+                ip = iosEvent.ip()
+                plan = iosEvent.plan()?.let {
+                    Plan(branch = it.branch(), source = it.source(), version = it.version(), versionId = it.versionId())
+                }
+                ingestionMetadata = iosEvent.ingestionMetadata()?.let {
+                    IngestionMetadata(sourceName = it.sourceName(), sourceVersion = it.sourceVersion())
+                }
+                revenue = iosEvent.revenue().takeIf { !it.isNaN() }
+                price = iosEvent.price().takeIf { !it.isNaN() }
+                quantity = iosEvent.quantity().takeIf { it != -1L }?.toInt()
+                productId = iosEvent.productId()
+                revenueType = iosEvent.revenueType()
+                currency = iosEvent.currency()
+                partnerId = iosEvent.partnerId()
+            }
+            this(event, status.toInt(), message ?: "")
+        }
     }
 }
 

@@ -218,6 +218,9 @@ amplitude.track(event) { event, status, message ->
 }
 ```
 
+On iOS, callback events preserve the actual event type and readable fields, but their
+property maps are unavailable. See [iOS callback limitations](docs/known-limitations.md#ios-callback-event-properties).
+
 ### User Properties (Identify)
 
 The Identify API provides 150+ type-safe methods for user property operations:
