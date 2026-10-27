@@ -394,8 +394,8 @@ suspend fun trackUserJourney() {
     revenue.productId = "premium_plan"
     amplitude.awaitRevenue(revenue)
 
-    // Flush and wait for completion
-    amplitude.awaitFlush()
+    // Request a flush; this does not wait for uploads to complete
+    amplitude.flush()
 
     // Other suspend operations
     amplitude.awaitSetUserId("user_123")

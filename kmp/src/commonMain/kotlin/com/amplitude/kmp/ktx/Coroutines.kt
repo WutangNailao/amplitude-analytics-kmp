@@ -101,20 +101,6 @@ public suspend fun Amplitude.awaitRevenue(
 }
 
 /**
- * Flush all pending events and suspend until completion.
- *
- * Note: The flush() method doesn't provide a callback, so this implementation
- * calls flush() and immediately returns success. For reliable flush completion,
- * consider using awaitTrack with a final tracking event.
- *
- * @return Result with Unit (always success)
- */
-public suspend fun Amplitude.awaitFlush(): Result<Unit> {
-    flush()
-    return Result.success(Unit)
-}
-
-/**
  * Set user ID with coroutine support.
  *
  * @param userId User ID to set
