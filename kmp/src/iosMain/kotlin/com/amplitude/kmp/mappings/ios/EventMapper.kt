@@ -65,9 +65,16 @@ internal fun BaseEvent.toIOSBaseEvent(): AMPBaseEvent {
     callback?.let { event.setCallback(it.toIOSCallback()) }
     partnerId?.let { event.setPartnerId(it) }
 
-    // BaseEvent properties (userProperties, groups, groupProperties) don't have setters
-    // They are set via the constructor or are read-only
-    // Skip setting them here
+    // These read-only AMPProperties wrappers expose per-key mutation methods.
+    userProperties?.forEach { (key, value) ->
+        event.userProperties().set(key, value.toNSObject() ?: NSNull())
+    }
+    groups?.forEach { (key, value) ->
+        event.groups().set(key, value.toNSObject() ?: NSNull())
+    }
+    groupProperties?.forEach { (key, value) ->
+        event.groupProperties().set(key, value.toNSObject() ?: NSNull())
+    }
 
     return event
 }
@@ -127,8 +134,10 @@ internal fun Revenue.toIOSRevenue(): AMPRevenue {
     this.revenue?.let { revenue.setRevenue(it) }
     receipt?.let { revenue.setReceipt(it) }
 
-    // properties field doesn't have a setter - skip for now
-    // TODO: Find the correct way to set properties on iOS Revenue
+    // Mutate the contents of the read-only AMPProperties wrapper.
+    properties?.forEach { (key, value) ->
+        revenue.properties().set(key, value.toNSObject() ?: NSNull())
+    }
 
     return revenue
 }
