@@ -219,18 +219,11 @@ public actual class Amplitude internal constructor(
         groupName: Array<String>,
         options: EventOptions?,
     ): Amplitude {
-        // iOS SDK has setGroup(groupType: String, groupName: [String])
-        // but cinterop doesn't expose it, so call it with each element
-        // or use the NSArray-compatible call if available
-        if (groupName.isNotEmpty()) {
-            // For now, just use the first element
-            // TODO: Find the correct way to call iOS SDK's array-based setGroup
-            iosAmplitude.setGroup(
-                groupType = groupType,
-                groupName = groupName[0],
-                options = options?.toIOSEventOptions()
-            )
-        }
+        iosAmplitude.setGroup(
+            groupType = groupType,
+            groupNames = groupName.toList(),
+            options = options?.toIOSEventOptions()
+        )
         return this
     }
 
