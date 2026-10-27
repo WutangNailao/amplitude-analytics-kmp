@@ -50,6 +50,8 @@ public actual class Amplitude internal constructor(
         public actual operator fun invoke(configuration: Configuration): Amplitude {
             val iosConfig = configuration.toIOSConfiguration()
             val iosInstance = createIOSAmplitudeInstance(iosConfig)
+            configuration.deviceId?.let { iosInstance.setDeviceId(it) }
+            configuration.sessionId?.let { iosInstance.setSessionIdWithTimestamp(it) }
             return Amplitude(iosInstance).also { _instance = it }
         }
 

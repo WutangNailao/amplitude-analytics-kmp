@@ -40,6 +40,7 @@ internal fun Configuration.toIOSConfiguration(): AMPConfiguration {
     config.setTrackingOptions(trackingOptions.toIOSTrackingOptions())
     config.setEnableCoppaControl(enableCoppaControl)
     config.setFlushEventsOnClose(flushEventsOnClose)
+    config.setAutocapture(autocapture.toIOSAutocaptureOptions())
     config.setMinTimeBetweenSessionsMillis(minTimeBetweenSessionsMillis.toInt().toLong())
     config.setIdentifyBatchIntervalMillis(identifyBatchIntervalMillis.toInt().toLong())
     config.setMigrateLegacyData(migrateLegacyData)
@@ -88,7 +89,7 @@ internal fun Set<AutocaptureOption>.toIOSAutocaptureOptions(): AMPAutocaptureOpt
         when (option) {
             AutocaptureOption.SESSIONS -> options.add(AMPAutocaptureOptions.Companion.sessions())
             AutocaptureOption.APP_LIFECYCLES -> options.add(AMPAutocaptureOptions.Companion.appLifecycles())
-            AutocaptureOption.DEEP_LINKS -> options.add(AMPAutocaptureOptions.Companion.screenViews())  // Mapped to screenViews
+            AutocaptureOption.DEEP_LINKS -> Unit  // No native iOS autocapture equivalent.
             AutocaptureOption.SCREEN_VIEWS -> options.add(AMPAutocaptureOptions.Companion.screenViews())
             AutocaptureOption.ELEMENT_INTERACTIONS -> options.add(AMPAutocaptureOptions.Companion.elementInteractions())
             AutocaptureOption.FRUSTRATION_INTERACTIONS -> options.add(AMPAutocaptureOptions.Companion.frustrationInteractions())

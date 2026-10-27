@@ -88,16 +88,6 @@ public data class Configuration(
     public var minTimeBetweenSessionsMillis: Long = MIN_TIME_BETWEEN_SESSIONS_MILLIS,
 
     /**
-     * Track session events automatically (default: true)
-     */
-    public var trackingSessionEvents: Boolean = true,
-
-    /**
-     * Default tracking options for auto-capture
-     */
-    public var defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions(),
-
-    /**
      * Identify batch interval in milliseconds (default: 30000 = 30 seconds)
      */
     public var identifyBatchIntervalMillis: Long = IDENTIFY_BATCH_INTERVAL_MILLIS,
@@ -114,11 +104,14 @@ public data class Configuration(
 
     /**
      * Custom device ID (overrides SDK-generated ID)
+     * On iOS, applied immediately after the native SDK is constructed.
      */
     public var deviceId: String? = null,
 
     /**
      * Custom session ID (overrides SDK-generated ID)
+     * On iOS, passed to the native session-start API after construction;
+     * this operation is asynchronous and may emit session events.
      */
     public var sessionId: Long? = null,
 
@@ -160,6 +153,7 @@ public data class Configuration(
 
     /**
      * Autocapture options (platform-specific implementation)
+     * Include SESSIONS to track session events; use an empty set to disable autocapture.
      */
     public var autocapture: Set<AutocaptureOption> = setOf(AutocaptureOption.SESSIONS),
 
@@ -254,6 +248,7 @@ public enum class AutocaptureOption {
 
     /**
      * Track deep link opens
+     * Android only; the iOS SDK has no equivalent autocapture option.
      */
     DEEP_LINKS,
 
@@ -286,41 +281,6 @@ public enum class AutocaptureOption {
         )
     }
 }
-
-/**
- * Default tracking options for auto-capture features
- */
-public data class DefaultTrackingOptions(
-    /**
-     * Enable session tracking
-     */
-    public var sessions: Boolean = true,
-
-    /**
-     * Enable app lifecycle tracking
-     */
-    public var appLifecycles: Boolean = false,
-
-    /**
-     * Enable deep link tracking
-     */
-    public var deepLinks: Boolean = false,
-
-    /**
-     * Enable screen view tracking
-     */
-    public var screenViews: Boolean = false,
-
-    /**
-     * Enable element interaction tracking
-     */
-    public var elementInteractions: Boolean = false,
-
-    /**
-     * Enable frustration interaction tracking
-     */
-    public var frustrationInteractions: Boolean = false,
-)
 
 /**
  * Tracking options for opting out of specific fields

@@ -491,7 +491,6 @@ val amplitude = Amplitude(apiKey = "KEY", context = context) {
 
     // Session Management
     minTimeBetweenSessionsMillis = 300000  // Session timeout (5min)
-    trackingSessionEvents = true           // Auto-track sessions
 
     // Privacy & Tracking
     optOut = false                         // Opt-out of tracking
@@ -502,7 +501,7 @@ val amplitude = Amplitude(apiKey = "KEY", context = context) {
     deviceId = "custom-device-id"          // Override device ID
     minIdLength = 5                        // Min length for IDs
 
-    // Auto-capture (Android)
+    // Auto-capture (Android and iOS; supported options vary by platform)
     autocapture = setOf(
         AutocaptureOption.SESSIONS,              // Session events
         AutocaptureOption.APP_LIFECYCLES,        // App lifecycle
@@ -631,6 +630,12 @@ amplitude.setUserId("user_123").flush()
 **No other changes required!** 🎉
 
 ### Migration Checklist
+
+The deprecated `trackingSessionEvents`, `defaultTracking`, and `DefaultTrackingOptions`
+APIs are not provided. Use `autocapture` instead: include `AutocaptureOption.SESSIONS`
+to enable session events, omit it to disable them, or use `emptySet()` to disable
+all autocapture. Code using those legacy APIs must be updated; import-only migration
+does not apply to those APIs.
 
 - [ ] Update dependency from `analytics-android` to `analytics-kmp`
 - [ ] Update imports from `com.amplitude.android.*` to `com.amplitude.kmp.*`

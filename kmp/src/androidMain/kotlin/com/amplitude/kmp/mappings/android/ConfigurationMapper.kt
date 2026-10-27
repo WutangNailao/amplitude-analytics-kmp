@@ -1,6 +1,9 @@
 package com.amplitude.kmp.mappings.android
 
 import android.content.Context
+import com.amplitude.common.Logger
+import com.amplitude.common.android.LogcatLogger
+import com.amplitude.core.LoggerProvider
 import com.amplitude.android.Configuration as AndroidConfiguration
 import com.amplitude.android.AutocaptureOption as AndroidAutocaptureOption
 import com.amplitude.android.InteractionsOptions as AndroidInteractionsOptions
@@ -13,6 +16,7 @@ import com.amplitude.kmp.ServerZone
 import com.amplitude.kmp.AutocaptureOption
 import com.amplitude.kmp.InteractionsOptions
 import com.amplitude.kmp.TrackingOptions
+import com.amplitude.kmp.LogLevel
 
 /**
  * Map KMP Configuration to Android SDK Configuration.
@@ -20,6 +24,7 @@ import com.amplitude.kmp.TrackingOptions
 internal fun Configuration.toAndroidConfiguration(): AndroidConfiguration {
     val context = (androidContext as? Context)
         ?: throw IllegalArgumentException("androidContext must be android.content.Context on Android platform")
+    val logger = LogcatLogger().apply { logMode = logLevel.toAndroidLogMode() }
 
     return AndroidConfiguration(
         apiKey = apiKey,
@@ -28,6 +33,9 @@ internal fun Configuration.toAndroidConfiguration(): AndroidConfiguration {
         flushIntervalMillis = flushIntervalMillis,
         instanceName = instanceName,
         optOut = optOut,
+        loggerProvider = object : LoggerProvider {
+            override fun getLogger(amplitude: com.amplitude.core.Amplitude): Logger = logger
+        },
         minIdLength = minIdLength,
         partnerId = partnerId,
         callback = callback?.toAndroidCallback(),
@@ -53,6 +61,14 @@ internal fun Configuration.toAndroidConfiguration(): AndroidConfiguration {
         sessionId = sessionId,
         interactionsOptions = interactionsOptions.toAndroidInteractionsOptions()
     )
+}
+
+internal fun LogLevel.toAndroidLogMode(): Logger.LogMode = when (this) {
+    LogLevel.NONE -> Logger.LogMode.OFF
+    LogLevel.ERROR -> Logger.LogMode.ERROR
+    LogLevel.WARN -> Logger.LogMode.WARN
+    LogLevel.LOG -> Logger.LogMode.INFO
+    LogLevel.DEBUG, LogLevel.VERBOSE -> Logger.LogMode.DEBUG
 }
 
 /**
