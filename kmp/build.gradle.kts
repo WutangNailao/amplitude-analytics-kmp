@@ -31,7 +31,7 @@ kotlin {
         }
     }
 
-    // CocoaPods configuration for local Amplitude-Swift SDK
+    // CocoaPods configuration for the native iOS SDK
     cocoapods {
         version = "1.0.4"
         summary = "Amplitude Analytics KMP SDK"
@@ -41,11 +41,6 @@ kotlin {
         framework {
             baseName = "AmplitudeKMP"
             isStatic = true
-        }
-
-        // Use local source-based AmplitudeCore instead of binary XCFramework
-        pod("AmplitudeCore") {
-            source = path(project.rootProject.file("../AmplitudeCore-Swift"))
         }
 
         // AnalyticsConnector is a transitive pod of AmplitudeSwift and is NOT used by this module's

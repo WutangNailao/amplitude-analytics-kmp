@@ -9,7 +9,6 @@ Pod::Spec.new do |spec|
     spec.vendored_frameworks      = 'build/cocoapods/framework/AmplitudeKMP.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '13.0'
-    spec.dependency 'AmplitudeCore'
     spec.dependency 'AmplitudeSwift', '~> 1.16.2'
     if !Dir.exist?('build/cocoapods/framework/AmplitudeKMP.framework') || Dir.empty?('build/cocoapods/framework/AmplitudeKMP.framework')
         raise "
