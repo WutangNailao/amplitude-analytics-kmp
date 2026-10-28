@@ -37,6 +37,7 @@ conventions; platform differences and unsupported legacy APIs are documented in 
 - [Usage Guide](docs/usage.md) — installation, quick start, configuration, API examples, migration, and troubleshooting
 - [Known Limitations](docs/known-limitations.md) — iOS plugin and callback restrictions
 - [Contributing](CONTRIBUTING.md) — project structure, building, testing, publishing, and contributing
+- [Changelog](CHANGELOG.md) — release notes and migration information
 - [Sample Applications](samples/README.md) — sample project overview
 - [Official Amplitude Documentation](https://www.docs.developers.amplitude.com/)
 

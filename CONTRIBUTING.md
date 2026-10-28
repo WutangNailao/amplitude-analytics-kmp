@@ -73,5 +73,7 @@ We welcome contributions! To contribute:
 
 ## Release History
 
+See [CHANGELOG.md](CHANGELOG.md) for version changes and migration notes.
+
 See [GitHub Releases](https://github.com/wutangnailao/amplitude-analytics-kmp/releases) for published release notes
 and the [commit history](https://github.com/wutangnailao/amplitude-analytics-kmp/commits/main/) for changes.
