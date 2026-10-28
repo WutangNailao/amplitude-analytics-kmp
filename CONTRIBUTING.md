@@ -15,7 +15,7 @@
 ## Project Structure
 
 ```text
-amplitude-kmp/
+amplitude-analytics-kmp/
 ├── kmp/                           # Main KMP module
 │   ├── src/
 │   │   ├── commonMain/            # Platform-agnostic code
@@ -73,5 +73,5 @@ We welcome contributions! To contribute:
 
 ## Release History
 
-See [GitHub Releases](https://github.com/nathanfallet/amplitude-kmp/releases) for published release notes
-and the [commit history](https://github.com/nathanfallet/amplitude-kmp/commits/main/) for changes.
+See [GitHub Releases](https://github.com/wutangnailao/amplitude-analytics-kmp/releases) for published release notes
+and the [commit history](https://github.com/wutangnailao/amplitude-analytics-kmp/commits/main/) for changes.

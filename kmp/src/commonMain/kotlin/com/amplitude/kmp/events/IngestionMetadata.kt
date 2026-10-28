@@ -7,7 +7,7 @@ package com.amplitude.kmp.events
  */
 public data class IngestionMetadata(
     /**
-     * Source name for the event (e.g., "amplitude-kmp")
+     * Source name for the event (e.g., "amplitude-analytics-kmp")
      */
     public val sourceName: String? = null,
 

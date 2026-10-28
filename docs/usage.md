@@ -26,7 +26,7 @@ Add to your `build.gradle.kts`:
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("me.nathanfallet.amplitude:analytics-kmp:1.0.3")
+            implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.3")
         }
     }
 }
@@ -36,7 +36,7 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("me.nathanfallet.amplitude:analytics-kmp:1.0.3")
+    implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.3")
 }
 ```
 
@@ -561,7 +561,7 @@ The KMP SDK maintains **100% API compatibility** with the Android SDK. Migration
 // implementation("com.amplitude:analytics-android:X.X.X")
 
 // Add KMP SDK
-implementation("me.nathanfallet.amplitude:analytics-kmp:1.0.3")
+implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.3")
 ```
 
 ### Step 2: Update Imports
@@ -616,7 +616,7 @@ to enable session events, omit it to disable them, or use `emptySet()` to disabl
 all autocapture. Code using those legacy APIs must be updated; import-only migration
 does not apply to those APIs.
 
-- [ ] Update dependency from `analytics-android` to `analytics-kmp`
+- [ ] Update dependency from `analytics-android` to `amplitude-analytics-kmp`
 - [ ] Update imports from `com.amplitude.android.*` to `com.amplitude.kmp.*`
 - [ ] Update imports from `com.amplitude.core.*` to `com.amplitude.kmp.*`
 - [ ] Test your app
@@ -761,7 +761,7 @@ Amplitude(apiKey, activityContext)
 See [Known Limitations](known-limitations.md) for the current iOS custom plugin
 property-loss limitation, its interoperability constraints, and recommended usage.
 
-Report other compatibility issues through [GitHub Issues](https://github.com/nathanfallet/amplitude-kmp/issues).
+Report other compatibility issues through [GitHub Issues](https://github.com/wutangnailao/amplitude-analytics-kmp/issues).
 
 ### Our Commitment: 100% API Compatibility
 
@@ -771,7 +771,7 @@ no code modifications.
 If you encounter **any API differences** after migrating from the Android SDK (beyond the known issues listed in the
 limitations linked above), please:
 
-1. **Report it immediately** by [opening an issue](https://github.com/nathanfallet/amplitude-kmp/issues)
+1. **Report it immediately** by [opening an issue](https://github.com/wutangnailao/amplitude-analytics-kmp/issues)
 2. Include:
     - Code that works in Android SDK
     - Code that fails/differs in KMP SDK

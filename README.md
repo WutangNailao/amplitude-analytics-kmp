@@ -1,6 +1,6 @@
-# Amplitude Analytics Kotlin Multiplatform SDK
+# amplitude-analytics-kmp
 
-[![Maven Central](https://img.shields.io/maven-central/v/me.nathanfallet.amplitude/analytics-kmp)](https://klibs.io/project/nathanfallet/amplitude-kmp)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.wutangnailao/amplitude-analytics-kmp)](https://central.sonatype.com/artifact/io.github.wutangnailao/amplitude-analytics-kmp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A community-maintained Kotlin Multiplatform wrapper for [Amplitude Analytics](https://amplitude.com).
@@ -60,7 +60,7 @@ organization and publish it under the official `com.amplitude` Maven group. Than
 
 ## Support
 
-- [GitHub Issues](https://github.com/nathanfallet/amplitude-kmp/issues)
+- [GitHub Issues](https://github.com/wutangnailao/amplitude-analytics-kmp/issues)
 - [Amplitude Help Center](https://help.amplitude.com/)
 - [Community Forum](https://community.amplitude.com/)
 - [Amplitude Email Support](mailto:support@amplitude.com)

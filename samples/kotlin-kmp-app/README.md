@@ -21,7 +21,7 @@ This sample demonstrates how to use the Amplitude Kotlin Multiplatform SDK in a 
 
 **Android:**
 
-Create `local.properties` in the **root project directory** (`amplitude-kmp/local.properties`):
+Create `local.properties` in the **root project directory** (`amplitude-analytics-kmp/local.properties`):
 
 ```properties
 AMPLITUDE_API_KEY=your_android_api_key_here

@@ -39,6 +39,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "amplitude-kmp"
+rootProject.name = "amplitude-analytics-kmp"
 include("kmp")
 include("samples:kotlin-kmp-app")

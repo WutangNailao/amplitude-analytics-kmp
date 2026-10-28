@@ -52,7 +52,7 @@ Before running the samples, you need to configure your Amplitude API keys.
 
 ### Android API Key Setup
 
-1. **Create `local.properties`** in the root project directory (`amplitude-kmp/local.properties`):
+1. **Create `local.properties`** in the root project directory (`amplitude-analytics-kmp/local.properties`):
    ```properties
    AMPLITUDE_API_KEY=your_android_api_key_here
    ```

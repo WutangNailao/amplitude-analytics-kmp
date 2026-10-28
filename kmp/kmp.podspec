@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'kmp'
     spec.version                  = '1.0.4'
-    spec.homepage                 = 'https://github.com/amplitude/amplitude-kmp'
+    spec.homepage                 = 'https://github.com/wutangnailao/amplitude-analytics-kmp'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''

@@ -35,7 +35,7 @@ kotlin {
     cocoapods {
         version = "1.0.4"
         summary = "Amplitude Analytics KMP SDK"
-        homepage = "https://github.com/amplitude/amplitude-kmp"
+        homepage = project.findProperty("POM_URL")?.toString() ?: ""
         ios.deploymentTarget = libs.versions.iosDeploymentTarget.get()
 
         framework {
@@ -184,7 +184,7 @@ android {
 
 // Maven Publishing (following Android SDK pattern)
 mavenPublishing {
-    coordinates(artifactId = "analytics-kmp")
+    coordinates(artifactId = "amplitude-analytics-kmp")
 
     pom {
         name.set("Amplitude Analytics KMP")
