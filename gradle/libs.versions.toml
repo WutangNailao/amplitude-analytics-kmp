@@ -1,7 +1,7 @@
 [versions]
 # Kotlin & Gradle
 kotlin = "2.3.0"
-androidGradlePlugin = "8.7.3"
+androidGradlePlugin = "8.13.2"
 dokka = "2.0.0"
 ktlint = "12.3.0"
 mavenPublish = "0.33.0"
@@ -29,12 +29,8 @@ androidTargetSdk = "35"
 iosDeploymentTarget = "13.0"
 
 # Testing
-junit = "5.9.3"
-junit4 = "4.13.2"
 mockk = "1.13.13"
-robolectric = "4.15.1"
 testCore = "1.6.1"
-testExtJunit = "1.6.1"
 
 # Java
 jvmTarget = "11"
@@ -57,17 +53,8 @@ androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", 
 
 # Testing
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
-junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
-junit4 = { module = "junit:junit", version.ref = "junit4" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 test-core = { module = "androidx.test:core", version.ref = "testCore" }
-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "testExtJunit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

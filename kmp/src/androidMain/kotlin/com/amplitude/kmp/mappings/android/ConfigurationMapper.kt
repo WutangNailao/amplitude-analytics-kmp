@@ -4,26 +4,27 @@ import android.content.Context
 import com.amplitude.common.Logger
 import com.amplitude.common.android.LogcatLogger
 import com.amplitude.core.LoggerProvider
-import com.amplitude.android.Configuration as AndroidConfiguration
+import com.amplitude.kmp.AutocaptureOption
+import com.amplitude.kmp.Configuration
+import com.amplitude.kmp.InteractionsOptions
+import com.amplitude.kmp.LogLevel
+import com.amplitude.kmp.ServerZone
+import com.amplitude.kmp.TrackingOptions
 import com.amplitude.android.AutocaptureOption as AndroidAutocaptureOption
+import com.amplitude.android.Configuration as AndroidConfiguration
+import com.amplitude.android.DeadClickOptions as AndroidDeadClickOptions
 import com.amplitude.android.InteractionsOptions as AndroidInteractionsOptions
 import com.amplitude.android.RageClickOptions as AndroidRageClickOptions
-import com.amplitude.android.DeadClickOptions as AndroidDeadClickOptions
 import com.amplitude.android.TrackingOptions as AndroidTrackingOptions
 import com.amplitude.core.ServerZone as AndroidServerZone
-import com.amplitude.kmp.Configuration
-import com.amplitude.kmp.ServerZone
-import com.amplitude.kmp.AutocaptureOption
-import com.amplitude.kmp.InteractionsOptions
-import com.amplitude.kmp.TrackingOptions
-import com.amplitude.kmp.LogLevel
 
 /**
  * Map KMP Configuration to Android SDK Configuration.
  */
 internal fun Configuration.toAndroidConfiguration(): AndroidConfiguration {
-    val context = (androidContext as? Context)
-        ?: throw IllegalArgumentException("androidContext must be android.content.Context on Android platform")
+    val context =
+        (androidContext as? Context)
+            ?: throw IllegalArgumentException("androidContext must be android.content.Context on Android platform")
     val logger = LogcatLogger().apply { logMode = logLevel.toAndroidLogMode() }
 
     return AndroidConfiguration(
@@ -33,9 +34,10 @@ internal fun Configuration.toAndroidConfiguration(): AndroidConfiguration {
         flushIntervalMillis = flushIntervalMillis,
         instanceName = instanceName,
         optOut = optOut,
-        loggerProvider = object : LoggerProvider {
-            override fun getLogger(amplitude: com.amplitude.core.Amplitude): Logger = logger
-        },
+        loggerProvider =
+            object : LoggerProvider {
+                override fun getLogger(amplitude: com.amplitude.core.Amplitude): Logger = logger
+            },
         minIdLength = minIdLength,
         partnerId = partnerId,
         callback = callback?.toAndroidCallback(),
@@ -59,17 +61,18 @@ internal fun Configuration.toAndroidConfiguration(): AndroidConfiguration {
         offline = offline,
         deviceId = deviceId,
         sessionId = sessionId,
-        interactionsOptions = interactionsOptions.toAndroidInteractionsOptions()
+        interactionsOptions = interactionsOptions.toAndroidInteractionsOptions(),
     )
 }
 
-internal fun LogLevel.toAndroidLogMode(): Logger.LogMode = when (this) {
-    LogLevel.NONE -> Logger.LogMode.OFF
-    LogLevel.ERROR -> Logger.LogMode.ERROR
-    LogLevel.WARN -> Logger.LogMode.WARN
-    LogLevel.LOG -> Logger.LogMode.INFO
-    LogLevel.DEBUG, LogLevel.VERBOSE -> Logger.LogMode.DEBUG
-}
+internal fun LogLevel.toAndroidLogMode(): Logger.LogMode =
+    when (this) {
+        LogLevel.NONE -> Logger.LogMode.OFF
+        LogLevel.ERROR -> Logger.LogMode.ERROR
+        LogLevel.WARN -> Logger.LogMode.WARN
+        LogLevel.LOG -> Logger.LogMode.INFO
+        LogLevel.DEBUG, LogLevel.VERBOSE -> Logger.LogMode.DEBUG
+    }
 
 /**
  * Map KMP ServerZone to Android ServerZone.
@@ -130,6 +133,6 @@ internal fun TrackingOptions.toAndroidTrackingOptions(): AndroidTrackingOptions 
 internal fun InteractionsOptions.toAndroidInteractionsOptions(): AndroidInteractionsOptions {
     return AndroidInteractionsOptions(
         rageClick = AndroidRageClickOptions(enabled = rageClick.enabled),
-        deadClick = AndroidDeadClickOptions(enabled = deadClick.enabled)
+        deadClick = AndroidDeadClickOptions(enabled = deadClick.enabled),
     )
 }

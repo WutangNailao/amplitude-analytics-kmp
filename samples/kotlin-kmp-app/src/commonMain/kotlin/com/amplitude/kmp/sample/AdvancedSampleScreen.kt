@@ -1,10 +1,26 @@
 package com.amplitude.kmp.sample
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,25 +42,26 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(32.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = "Advanced Amplitude Features",
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
             )
 
             if (message.isNotEmpty()) {
@@ -52,27 +69,30 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF4CAF50),
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
             }
 
             Button(
                 onClick = {
                     // Set user properties using Identify
-                    val identify = Identify()
-                        .set("user_platform", getPlatformName())
-                        .set("custom_property", "sample_value")
-                        .set("is_kmp_user", true)
+                    val identify =
+                        Identify()
+                            .set("user_platform", getPlatformName())
+                            .set("custom_property", "sample_value")
+                            .set("is_kmp_user", true)
 
                     AmplitudeManager.amplitude.identify(identify)
                     message = "✓ User properties set"
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                    ),
             ) {
                 Text("Set User Properties (Identify)")
             }
@@ -83,16 +103,18 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
                     AmplitudeManager.amplitude.setGroup("orgId", "15")
                     AmplitudeManager.amplitude.setGroup(
                         groupType = "platform",
-                        groupName = arrayOf(getPlatformName(), "KMP")
+                        groupName = arrayOf(getPlatformName(), "KMP"),
                     )
                     message = "✓ Groups set"
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2196F3)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2196F3),
+                    ),
             ) {
                 Text("Set Groups")
             }
@@ -100,23 +122,26 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
             Button(
                 onClick = {
                     // Group identify
-                    val groupIdentifyObj = Identify()
-                        .set("plan_type", "premium")
-                        .set("trial_days", 30)
+                    val groupIdentifyObj =
+                        Identify()
+                            .set("plan_type", "premium")
+                            .set("trial_days", 30)
 
                     AmplitudeManager.amplitude.groupIdentify(
                         groupType = "orgId",
                         groupName = "15",
-                        identify = groupIdentifyObj
+                        identify = groupIdentifyObj,
                     )
                     message = "✓ Group properties set"
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF9C27B0)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF9C27B0),
+                    ),
             ) {
                 Text("Set Group Properties")
             }
@@ -124,26 +149,30 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
             Button(
                 onClick = {
                     // Track revenue
-                    val revenue = Revenue().apply {
-                        productId = "com.amplitude.product"
-                        price = 9.99
-                        quantity = 1
-                        revenueType = "purchase"
-                        properties = mutableMapOf(
-                            "category" to "subscription",
-                            "platform" to getPlatformName()
-                        )
-                    }
+                    val revenue =
+                        Revenue().apply {
+                            productId = "com.amplitude.product"
+                            price = 9.99
+                            quantity = 1
+                            revenueType = "purchase"
+                            properties =
+                                mutableMapOf(
+                                    "category" to "subscription",
+                                    "platform" to getPlatformName(),
+                                )
+                        }
 
                     AmplitudeManager.amplitude.revenue(revenue)
                     message = "✓ Revenue tracked: $9.99"
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF9800)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF9800),
+                    ),
             ) {
                 Text("Track Revenue")
             }
@@ -154,12 +183,14 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
                     sendAllAdvancedEvents()
                     message = "✓ All advanced events sent!"
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF44336)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF44336),
+                    ),
             ) {
                 Text("Send All Advanced Events")
             }
@@ -169,9 +200,10 @@ fun AdvancedSampleScreen(onBack: () -> Unit) {
 
 private fun sendAllAdvancedEvents() {
     // Set user properties
-    val identify = Identify()
-        .set("user_platform", getPlatformName())
-        .set("custom_property", "batch_test")
+    val identify =
+        Identify()
+            .set("user_platform", getPlatformName())
+            .set("custom_property", "batch_test")
     AmplitudeManager.amplitude.identify(identify)
 
     // Set groups
@@ -181,16 +213,18 @@ private fun sendAllAdvancedEvents() {
     AmplitudeManager.amplitude.setGroup("orgId", "15")
 
     // Group identify
-    val groupIdentifyObj = Identify()
-        .set("key", "value")
-        .set("timestamp", Clock.System.now().toEpochMilliseconds())
+    val groupIdentifyObj =
+        Identify()
+            .set("key", "value")
+            .set("timestamp", Clock.System.now().toEpochMilliseconds())
     AmplitudeManager.amplitude.groupIdentify(groupType, groupName, groupIdentifyObj)
 
     // Track revenue
-    val revenue = Revenue().apply {
-        productId = "com.amplitude.batch_product"
-        price = 19.99
-        quantity = 2
-    }
+    val revenue =
+        Revenue().apply {
+            productId = "com.amplitude.batch_product"
+            price = 19.99
+            quantity = 2
+        }
     AmplitudeManager.amplitude.revenue(revenue)
 }

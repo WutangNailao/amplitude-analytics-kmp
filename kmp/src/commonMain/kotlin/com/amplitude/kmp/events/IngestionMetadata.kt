@@ -10,7 +10,6 @@ public data class IngestionMetadata(
      * Source name for the event (e.g., "amplitude-analytics-kmp")
      */
     public val sourceName: String? = null,
-
     /**
      * Source version for the event (SDK version)
      */

@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -14,6 +15,12 @@ plugins {
 
 allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    extensions.configure<KtlintExtension> {
+        filter {
+            exclude { it.file.toPath().startsWith(layout.buildDirectory.get().asFile.toPath()) }
+        }
+    }
 
     group = project.findProperty("GROUP") ?: ""
     version = project.findProperty("VERSION_NAME") ?: "0.0.1-SNAPSHOT"

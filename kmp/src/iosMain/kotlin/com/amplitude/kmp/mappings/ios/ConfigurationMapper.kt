@@ -1,13 +1,29 @@
 package com.amplitude.kmp.mappings.ios
 
-import cocoapods.AmplitudeSwift.*
-import com.amplitude.kmp.*
+import cocoapods.AmplitudeSwift.AMPAutocaptureOptions
+import cocoapods.AmplitudeSwift.AMPConfiguration
+import cocoapods.AmplitudeSwift.AMPDeadClickOptions
+import cocoapods.AmplitudeSwift.AMPInteractionsOptions
+import cocoapods.AmplitudeSwift.AMPLogLevel
+import cocoapods.AmplitudeSwift.AMPLogLevelDEBUG
+import cocoapods.AmplitudeSwift.AMPLogLevelERROR
+import cocoapods.AmplitudeSwift.AMPLogLevelLOG
+import cocoapods.AmplitudeSwift.AMPLogLevelOFF
+import cocoapods.AmplitudeSwift.AMPLogLevelWARN
+import cocoapods.AmplitudeSwift.AMPRageClickOptions
+import cocoapods.AmplitudeSwift.AMPTrackingOptions
+import com.amplitude.kmp.AutocaptureOption
+import com.amplitude.kmp.Configuration
+import com.amplitude.kmp.InteractionsOptions
+import com.amplitude.kmp.LogLevel
+import com.amplitude.kmp.ServerZone
+import com.amplitude.kmp.TrackingOptions
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSNumber
 import platform.Foundation.setValue
 import platform.darwin.NSObject
 
-/**
+/*
  * iOS mapping utilities for Configuration.
  *
  * Maps KMP Configuration to iOS AMPConfiguration using CocoaPods cinterop.
@@ -58,12 +74,12 @@ internal fun Configuration.toIOSConfiguration(): AMPConfiguration {
 @OptIn(ExperimentalForeignApi::class)
 internal fun LogLevel.toIOSLogLevel(): AMPLogLevel {
     return when (this) {
-        LogLevel.NONE -> AMPLogLevelOFF  // OFF = 0
-        LogLevel.ERROR -> AMPLogLevelERROR  // ERROR = 1
-        LogLevel.WARN -> AMPLogLevelWARN  // WARN = 2
-        LogLevel.LOG -> AMPLogLevelLOG  // LOG = 3
-        LogLevel.DEBUG -> AMPLogLevelDEBUG  // DEBUG = 4
-        LogLevel.VERBOSE -> AMPLogLevelDEBUG  // iOS doesn't have VERBOSE, use DEBUG
+        LogLevel.NONE -> AMPLogLevelOFF // OFF = 0
+        LogLevel.ERROR -> AMPLogLevelERROR // ERROR = 1
+        LogLevel.WARN -> AMPLogLevelWARN // WARN = 2
+        LogLevel.LOG -> AMPLogLevelLOG // LOG = 3
+        LogLevel.DEBUG -> AMPLogLevelDEBUG // DEBUG = 4
+        LogLevel.VERBOSE -> AMPLogLevelDEBUG // iOS doesn't have VERBOSE, use DEBUG
     }
 }
 
@@ -72,10 +88,11 @@ internal fun LogLevel.toIOSLogLevel(): AMPLogLevel {
  * AMPServerZone is a Swift-native enum that cinterop can't instantiate directly under Swift 6/Xcode 26.
  * Returns the raw NSInteger value: US=0, EU=1.
  */
-internal fun ServerZone.toIOSServerZoneValue(): Long = when (this) {
-    ServerZone.US -> 0L  // AMPServerZoneUS
-    ServerZone.EU -> 1L  // AMPServerZoneEU
-}
+internal fun ServerZone.toIOSServerZoneValue(): Long =
+    when (this) {
+        ServerZone.US -> 0L // AMPServerZoneUS
+        ServerZone.EU -> 1L // AMPServerZoneEU
+    }
 
 /**
  * Map KMP AutocaptureOption set to iOS AMPAutocaptureOptions.
@@ -89,7 +106,7 @@ internal fun Set<AutocaptureOption>.toIOSAutocaptureOptions(): AMPAutocaptureOpt
         when (option) {
             AutocaptureOption.SESSIONS -> options.add(AMPAutocaptureOptions.Companion.sessions())
             AutocaptureOption.APP_LIFECYCLES -> options.add(AMPAutocaptureOptions.Companion.appLifecycles())
-            AutocaptureOption.DEEP_LINKS -> Unit  // No native iOS autocapture equivalent.
+            AutocaptureOption.DEEP_LINKS -> Unit // No native iOS autocapture equivalent.
             AutocaptureOption.SCREEN_VIEWS -> options.add(AMPAutocaptureOptions.Companion.screenViews())
             AutocaptureOption.ELEMENT_INTERACTIONS -> options.add(AMPAutocaptureOptions.Companion.elementInteractions())
             AutocaptureOption.FRUSTRATION_INTERACTIONS -> options.add(AMPAutocaptureOptions.Companion.frustrationInteractions())
@@ -146,6 +163,6 @@ internal fun InteractionsOptions.toIOSInteractionsOptions(): AMPInteractionsOpti
 
     return AMPInteractionsOptions(
         rageClick = rageClickOptions,
-        deadClick = deadClickOptions
+        deadClick = deadClickOptions,
     )
 }

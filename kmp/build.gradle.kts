@@ -23,7 +23,7 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "AmplitudeKMP"
@@ -99,12 +99,7 @@ kotlin {
             dependencies {
                 implementation(libs.mockk)
                 implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.junit.jupiter)
-                implementation(libs.junit.jupiter.api)
-                implementation(libs.kotlin.test.junit)
-                implementation(libs.robolectric)
                 implementation(libs.test.core)
-                implementation(libs.test.ext.junit)
             }
         }
 
@@ -161,7 +156,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -219,13 +214,11 @@ mavenPublishing {
     configure(
         KotlinMultiplatform(
             sourcesJar = true,
-        )
+        ),
     )
 }
 
-// JUnit 5 support for tests (like Android SDK)
 tasks.withType<Test> {
-    useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true

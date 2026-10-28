@@ -8,6 +8,7 @@ package com.amplitude.kmp.events
  */
 public open class EventOptions {
     // Identity Properties
+
     /**
      * User ID for this event
      */
@@ -19,6 +20,7 @@ public open class EventOptions {
     public var deviceId: String? = null
 
     // Timing Properties
+
     /**
      * Timestamp for this event (milliseconds since epoch)
      */
@@ -40,6 +42,7 @@ public open class EventOptions {
     public var insertId: String? = null
 
     // Location Properties
+
     /**
      * Latitude coordinate
      */
@@ -51,6 +54,7 @@ public open class EventOptions {
     public var locationLng: Double? = null
 
     // App Properties
+
     /**
      * App version (e.g., "1.2.3")
      */
@@ -67,6 +71,7 @@ public open class EventOptions {
     public var platform: String? = null
 
     // OS Properties
+
     /**
      * Operating system name (e.g., "Android", "iOS")
      */
@@ -78,6 +83,7 @@ public open class EventOptions {
     public var osVersion: String? = null
 
     // Device Properties
+
     /**
      * Device brand (e.g., "Apple", "Samsung")
      */
@@ -99,6 +105,7 @@ public open class EventOptions {
     public var carrier: String? = null
 
     // Geographic Properties
+
     /**
      * Country code (e.g., "US")
      */
@@ -120,6 +127,7 @@ public open class EventOptions {
     public var dma: String? = null
 
     // Identifier Properties
+
     /**
      * iOS Identifier for Advertisers (IDFA)
      */
@@ -146,6 +154,7 @@ public open class EventOptions {
     public var androidId: String? = null
 
     // Other Properties
+
     /**
      * Language code (e.g., "en-US")
      */
@@ -162,6 +171,7 @@ public open class EventOptions {
     public var ip: String? = null
 
     // Metadata Properties
+
     /**
      * Tracking plan configuration
      */
@@ -173,6 +183,7 @@ public open class EventOptions {
     public var ingestionMetadata: IngestionMetadata? = null
 
     // Revenue Properties (for revenue events)
+
     /**
      * Revenue amount
      */
@@ -204,6 +215,7 @@ public open class EventOptions {
     public var currency: String? = null
 
     // Additional Properties
+
     /**
      * Extra properties for event-specific data
      */

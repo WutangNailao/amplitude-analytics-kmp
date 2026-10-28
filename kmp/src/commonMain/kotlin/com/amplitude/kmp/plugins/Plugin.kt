@@ -44,7 +44,7 @@ public interface Plugin {
         /**
          * Utility plugins that don't fit other categories
          */
-        UTILITY
+        UTILITY,
     }
 
     /**

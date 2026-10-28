@@ -8,7 +8,7 @@ import com.amplitude.kmp.events.Revenue
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-/**
+/*
  * Coroutines extensions for Amplitude SDK.
  *
  * Provides suspend functions that convert callback-based API to coroutines.
@@ -23,16 +23,17 @@ import kotlin.coroutines.resume
  */
 public suspend fun Amplitude.awaitTrack(
     event: BaseEvent,
-    options: EventOptions? = null
-): Result<Unit> = suspendCancellableCoroutine { continuation ->
-    track(event, options) { _, status, message ->
-        if (status == 200) {
-            continuation.resume(Result.success(Unit))
-        } else {
-            continuation.resume(Result.failure(Exception("Track failed with status $status: $message")))
+    options: EventOptions? = null,
+): Result<Unit> =
+    suspendCancellableCoroutine { continuation ->
+        track(event, options) { _, status, message ->
+            if (status == 200) {
+                continuation.resume(Result.success(Unit))
+            } else {
+                continuation.resume(Result.failure(Exception("Track failed with status $status: $message")))
+            }
         }
     }
-}
 
 /**
  * Track an event by type and suspend until completion.
@@ -45,7 +46,7 @@ public suspend fun Amplitude.awaitTrack(
 public suspend fun Amplitude.awaitTrack(
     eventType: String,
     eventProperties: Map<String, Any?>? = null,
-    options: EventOptions? = null
+    options: EventOptions? = null,
 ): Result<Unit> {
     val event = BaseEvent(eventType, eventProperties?.toMutableMap())
     return awaitTrack(event, options)
@@ -60,7 +61,7 @@ public suspend fun Amplitude.awaitTrack(
  */
 public suspend fun Amplitude.awaitIdentify(
     identify: Identify,
-    options: EventOptions? = null
+    options: EventOptions? = null,
 ): Result<Unit> {
     val event = identify.toIdentifyEvent()
     return awaitTrack(event, options)
@@ -75,13 +76,14 @@ public suspend fun Amplitude.awaitIdentify(
  */
 public suspend fun Amplitude.awaitIdentify(
     userProperties: Map<String, Any?>?,
-    options: EventOptions? = null
+    options: EventOptions? = null,
 ): Result<Unit> {
-    val identify = Identify().apply {
-        userProperties?.forEach { (key, value) ->
-            set(key, value ?: "")
+    val identify =
+        Identify().apply {
+            userProperties?.forEach { (key, value) ->
+                set(key, value ?: "")
+            }
         }
-    }
     return awaitIdentify(identify, options)
 }
 
@@ -94,7 +96,7 @@ public suspend fun Amplitude.awaitIdentify(
  */
 public suspend fun Amplitude.awaitRevenue(
     revenue: Revenue,
-    options: EventOptions? = null
+    options: EventOptions? = null,
 ): Result<Unit> {
     val event = revenue.toRevenueEvent()
     return awaitTrack(event, options)

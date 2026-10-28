@@ -1,11 +1,29 @@
 package com.amplitude.kmp.mappings.ios
 
-import cocoapods.AmplitudeSwift.*
-import com.amplitude.kmp.events.*
+import cocoapods.AmplitudeSwift.AMPBaseEvent
+import cocoapods.AmplitudeSwift.AMPEventOptions
+import cocoapods.AmplitudeSwift.AMPIdentify
+import cocoapods.AmplitudeSwift.AMPIngestionMetadata
+import cocoapods.AmplitudeSwift.AMPPlan
+import cocoapods.AmplitudeSwift.AMPRevenue
+import com.amplitude.kmp.events.BaseEvent
+import com.amplitude.kmp.events.EventCallBack
+import com.amplitude.kmp.events.EventOptions
+import com.amplitude.kmp.events.Identify
+import com.amplitude.kmp.events.IngestionMetadata
+import com.amplitude.kmp.events.Plan
+import com.amplitude.kmp.events.Revenue
+import com.amplitude.kmp.events.RevenueEvent
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.Foundation.*
+import platform.Foundation.NSArray
+import platform.Foundation.NSDictionary
+import platform.Foundation.NSMutableArray
+import platform.Foundation.NSMutableDictionary
+import platform.Foundation.NSNull
+import platform.Foundation.NSNumber
+import platform.Foundation.NSString
 
-/**
+/*
  * iOS mapping utilities for Events.
  *
  * Maps KMP event classes to iOS SDK event objects using CocoaPods cinterop.
@@ -20,10 +38,11 @@ internal fun BaseEvent.toIOSBaseEvent(): AMPBaseEvent {
     // Convert MutableMap<String, Any?> to Map<Any?, Any?> for iOS
     val iosEventProperties: Map<Any?, Any?>? = eventProperties?.toMap()
 
-    val event = AMPBaseEvent(
-        eventType = eventType,
-        eventProperties = iosEventProperties
-    )
+    val event =
+        AMPBaseEvent(
+            eventType = eventType,
+            eventProperties = iosEventProperties,
+        )
 
     // Set EventOptions properties using setters (cinterop requires setter methods)
     userId?.let { event.setUserId(it) }
@@ -206,23 +225,25 @@ internal fun EventOptions.toIOSEventOptions(): AMPEventOptions {
  * Map KMP Plan to iOS AMPPlan.
  */
 @OptIn(ExperimentalForeignApi::class)
-internal fun Plan.toIOSPlan(): AMPPlan = AMPPlan().apply {
-    // Use apply scope to set properties on the iOS object
-    this@toIOSPlan.branch?.let { setBranch(it) }
-    this@toIOSPlan.source?.let { setSource(it) }
-    this@toIOSPlan.version?.let { setVersion(it) }
-    this@toIOSPlan.versionId?.let { setVersionId(it) }
-}
+internal fun Plan.toIOSPlan(): AMPPlan =
+    AMPPlan().apply {
+        // Use apply scope to set properties on the iOS object
+        this@toIOSPlan.branch?.let { setBranch(it) }
+        this@toIOSPlan.source?.let { setSource(it) }
+        this@toIOSPlan.version?.let { setVersion(it) }
+        this@toIOSPlan.versionId?.let { setVersionId(it) }
+    }
 
 /**
  * Map KMP IngestionMetadata to iOS AMPIngestionMetadata.
  */
 @OptIn(ExperimentalForeignApi::class)
-internal fun IngestionMetadata.toIOSIngestionMetadata(): AMPIngestionMetadata = AMPIngestionMetadata().apply {
-    // Use apply scope to set properties on the iOS object
-    this@toIOSIngestionMetadata.sourceName?.let { setSourceName(it) }
-    this@toIOSIngestionMetadata.sourceVersion?.let { setSourceVersion(it) }
-}
+internal fun IngestionMetadata.toIOSIngestionMetadata(): AMPIngestionMetadata =
+    AMPIngestionMetadata().apply {
+        // Use apply scope to set properties on the iOS object
+        this@toIOSIngestionMetadata.sourceName?.let { setSourceName(it) }
+        this@toIOSIngestionMetadata.sourceVersion?.let { setSourceVersion(it) }
+    }
 
 /**
  * Map KMP EventCallBack to iOS EventCallback.
@@ -236,55 +257,58 @@ internal fun EventCallBack.toIOSCallback(): ((AMPBaseEvent?, Long, String?) -> U
         // The native callback contract supplies a non-null event. Do not fabricate
         // an event if an unexpected null arrives through the interop boundary.
         if (iosEvent != null) {
-            val event = BaseEvent(eventType = iosEvent.eventType()).apply {
-                userId = iosEvent.userId()
-                deviceId = iosEvent.deviceId()
-                timestamp = iosEvent.timestamp().takeIf { it != -1L }
-                eventId = iosEvent.eventId().takeIf { it != -1L }
-                // -1 is also a valid session ID for out-of-session events.
-                sessionId = iosEvent.sessionId()
-                insertId = iosEvent.insertId()
-                locationLat = iosEvent.locationLat().takeIf { !it.isNaN() }
-                locationLng = iosEvent.locationLng().takeIf { !it.isNaN() }
-                appVersion = iosEvent.appVersion()
-                versionName = iosEvent.versionName()
-                platform = iosEvent.platform()
-                osName = iosEvent.osName()
-                osVersion = iosEvent.osVersion()
-                deviceBrand = iosEvent.deviceBrand()
-                deviceManufacturer = iosEvent.deviceManufacturer()
-                deviceModel = iosEvent.deviceModel()
-                carrier = iosEvent.carrier()
-                country = iosEvent.country()
-                region = iosEvent.region()
-                city = iosEvent.city()
-                dma = iosEvent.dma()
-                idfa = iosEvent.idfa()
-                idfv = iosEvent.idfv()
-                adid = iosEvent.adid()
-                language = iosEvent.language()
-                library = iosEvent.library()
-                ip = iosEvent.ip()
-                plan = iosEvent.plan()?.let {
-                    Plan(branch = it.branch(), source = it.source(), version = it.version(), versionId = it.versionId())
+            val event =
+                BaseEvent(eventType = iosEvent.eventType()).apply {
+                    userId = iosEvent.userId()
+                    deviceId = iosEvent.deviceId()
+                    timestamp = iosEvent.timestamp().takeIf { it != -1L }
+                    eventId = iosEvent.eventId().takeIf { it != -1L }
+                    // -1 is also a valid session ID for out-of-session events.
+                    sessionId = iosEvent.sessionId()
+                    insertId = iosEvent.insertId()
+                    locationLat = iosEvent.locationLat().takeIf { !it.isNaN() }
+                    locationLng = iosEvent.locationLng().takeIf { !it.isNaN() }
+                    appVersion = iosEvent.appVersion()
+                    versionName = iosEvent.versionName()
+                    platform = iosEvent.platform()
+                    osName = iosEvent.osName()
+                    osVersion = iosEvent.osVersion()
+                    deviceBrand = iosEvent.deviceBrand()
+                    deviceManufacturer = iosEvent.deviceManufacturer()
+                    deviceModel = iosEvent.deviceModel()
+                    carrier = iosEvent.carrier()
+                    country = iosEvent.country()
+                    region = iosEvent.region()
+                    city = iosEvent.city()
+                    dma = iosEvent.dma()
+                    idfa = iosEvent.idfa()
+                    idfv = iosEvent.idfv()
+                    adid = iosEvent.adid()
+                    language = iosEvent.language()
+                    library = iosEvent.library()
+                    ip = iosEvent.ip()
+                    plan =
+                        iosEvent.plan()?.let {
+                            Plan(branch = it.branch(), source = it.source(), version = it.version(), versionId = it.versionId())
+                        }
+                    ingestionMetadata =
+                        iosEvent.ingestionMetadata()?.let {
+                            IngestionMetadata(sourceName = it.sourceName(), sourceVersion = it.sourceVersion())
+                        }
+                    revenue = iosEvent.revenue().takeIf { !it.isNaN() }
+                    price = iosEvent.price().takeIf { !it.isNaN() }
+                    quantity = iosEvent.quantity().takeIf { it != -1L }?.toInt()
+                    productId = iosEvent.productId()
+                    revenueType = iosEvent.revenueType()
+                    currency = iosEvent.currency()
+                    partnerId = iosEvent.partnerId()
                 }
-                ingestionMetadata = iosEvent.ingestionMetadata()?.let {
-                    IngestionMetadata(sourceName = it.sourceName(), sourceVersion = it.sourceVersion())
-                }
-                revenue = iosEvent.revenue().takeIf { !it.isNaN() }
-                price = iosEvent.price().takeIf { !it.isNaN() }
-                quantity = iosEvent.quantity().takeIf { it != -1L }?.toInt()
-                productId = iosEvent.productId()
-                revenueType = iosEvent.revenueType()
-                currency = iosEvent.currency()
-                partnerId = iosEvent.partnerId()
-            }
             this(event, status.toInt(), message ?: "")
         }
     }
 }
 
-/**
+/*
  * Map KMP Plugin to iOS Plugin.
  * Note: Plugin mapping is implemented in PluginMapper.kt
  * This is just a forward reference for convenience.
@@ -333,29 +357,31 @@ internal fun Array<String>.toNSArray(): NSArray {
  * Convert Any? to NSObject for iOS.
  */
 @OptIn(ExperimentalForeignApi::class)
-internal fun Any?.toNSObject(): Any? = when (this) {
-    null -> NSNull()
-    is String -> this
-    is Number -> this.toNSNumber()
-    is Boolean -> NSNumber(bool = this)
-    is Map<*, *> -> this.toNSDictionarySafe()
-    is List<*> -> this.toNSArray()
-    else -> this.toString()
-}
+internal fun Any?.toNSObject(): Any? =
+    when (this) {
+        null -> NSNull()
+        is String -> this
+        is Number -> this.toNSNumber()
+        is Boolean -> NSNumber(bool = this)
+        is Map<*, *> -> this.toNSDictionarySafe()
+        is List<*> -> this.toNSArray()
+        else -> this.toString()
+    }
 
 /**
  * Convert Number to NSNumber.
  */
 @OptIn(ExperimentalForeignApi::class)
-private fun Number.toNSNumber(): NSNumber = when (this) {
-    is Int -> NSNumber(int = this)
-    is Long -> NSNumber(longLong = this)
-    is Float -> NSNumber(float = this)
-    is Double -> NSNumber(double = this)
-    is Byte -> NSNumber(char = this)
-    is Short -> NSNumber(short = this)
-    else -> NSNumber(double = this.toDouble())
-}
+private fun Number.toNSNumber(): NSNumber =
+    when (this) {
+        is Int -> NSNumber(int = this)
+        is Long -> NSNumber(longLong = this)
+        is Float -> NSNumber(float = this)
+        is Double -> NSNumber(double = this)
+        is Byte -> NSNumber(char = this)
+        is Short -> NSNumber(short = this)
+        else -> NSNumber(double = this.toDouble())
+    }
 
 /**
  * Convert List to NSArray.

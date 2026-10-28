@@ -1,6 +1,11 @@
 package com.amplitude.kmp
 
-import com.amplitude.kmp.events.*
+import com.amplitude.kmp.events.BaseEvent
+import com.amplitude.kmp.events.EventCallBack
+import com.amplitude.kmp.events.EventOptions
+import com.amplitude.kmp.events.Identify
+import com.amplitude.kmp.events.Revenue
+import com.amplitude.kmp.events.RevenueEvent
 import com.amplitude.kmp.plugins.Plugin
 
 /**

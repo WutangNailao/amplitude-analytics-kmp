@@ -14,12 +14,13 @@ import kotlin.test.assertTrue
 class EventMapperTest {
     @Test
     fun baseEventPreservesPropertyMaps() {
-        val event = BaseEvent(
-            eventType = "Purchase",
-            userProperties = mutableMapOf("plan" to "premium"),
-            groups = mutableMapOf("company" to "amplitude"),
-            groupProperties = mutableMapOf("industry" to "analytics"),
-        ).toIOSBaseEvent()
+        val event =
+            BaseEvent(
+                eventType = "Purchase",
+                userProperties = mutableMapOf("plan" to "premium"),
+                groups = mutableMapOf("company" to "amplitude"),
+                groupProperties = mutableMapOf("industry" to "analytics"),
+            ).toIOSBaseEvent()
 
         assertEquals("premium", event.userProperties().get("plan"))
         assertEquals("amplitude", event.groups().get("company"))
@@ -36,10 +37,11 @@ class EventMapperTest {
 
     @Test
     fun revenuePreservesCustomPropertiesAndNullValues() {
-        val revenue = Revenue().apply {
-            price = 29.9
-            properties = mutableMapOf("source" to "settings", "optional" to null)
-        }.toIOSRevenue()
+        val revenue =
+            Revenue().apply {
+                price = 29.9
+                properties = mutableMapOf("source" to "settings", "optional" to null)
+            }.toIOSRevenue()
 
         assertEquals("settings", revenue.properties().get("source"))
         assertTrue(revenue.properties().get("optional") is NSNull)

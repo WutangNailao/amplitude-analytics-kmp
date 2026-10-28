@@ -11,28 +11,23 @@ public open class BaseEvent(
      * Type of the event (required)
      */
     public var eventType: String = "",
-
     /**
      * Event-specific properties
      */
     public var eventProperties: MutableMap<String, Any?>? = null,
-
     /**
      * User properties to update with this event
      */
     public var userProperties: MutableMap<String, Any?>? = null,
-
     /**
      * Group assignments for this event
      */
     public var groups: MutableMap<String, Any?>? = null,
-
     /**
      * Group properties to update with this event
      */
     public var groupProperties: MutableMap<String, Any?>? = null,
 ) : EventOptions() {
-
     /**
      * Merge EventOptions into this event
      */

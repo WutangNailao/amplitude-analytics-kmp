@@ -6,6 +6,7 @@ import androidx.compose.ui.window.ComposeUIViewController
  * Main view controller for iOS.
  * Amplitude is initialized automatically when the App composable loads.
  */
-fun MainViewController() = ComposeUIViewController {
-    App()
-}
+fun mainViewController() =
+    ComposeUIViewController {
+        App()
+    }

@@ -1,7 +1,7 @@
 package com.amplitude.kmp.mappings.android
 
-import com.amplitude.core.events.Revenue as AndroidRevenue
 import com.amplitude.kmp.events.Revenue
+import com.amplitude.core.events.Revenue as AndroidRevenue
 
 /**
  * Map KMP Revenue to Android Revenue.

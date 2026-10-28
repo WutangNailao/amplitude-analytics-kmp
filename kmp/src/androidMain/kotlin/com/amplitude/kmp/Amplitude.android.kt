@@ -1,8 +1,19 @@
 package com.amplitude.kmp
 
 import android.content.Context
-import com.amplitude.kmp.events.*
-import com.amplitude.kmp.mappings.android.*
+import com.amplitude.kmp.events.BaseEvent
+import com.amplitude.kmp.events.EventCallBack
+import com.amplitude.kmp.events.EventOptions
+import com.amplitude.kmp.events.Identify
+import com.amplitude.kmp.events.Revenue
+import com.amplitude.kmp.events.RevenueEvent
+import com.amplitude.kmp.mappings.android.toAndroidBaseEvent
+import com.amplitude.kmp.mappings.android.toAndroidCallback
+import com.amplitude.kmp.mappings.android.toAndroidConfiguration
+import com.amplitude.kmp.mappings.android.toAndroidEventOptions
+import com.amplitude.kmp.mappings.android.toAndroidIdentify
+import com.amplitude.kmp.mappings.android.toAndroidPlugin
+import com.amplitude.kmp.mappings.android.toAndroidRevenue
 import com.amplitude.kmp.plugins.Plugin
 import com.amplitude.kmp.utils.Lock
 import com.amplitude.android.Amplitude as AndroidAmplitude
@@ -216,7 +227,7 @@ public actual class Amplitude internal constructor(
             groupType,
             groupName,
             identify.toAndroidIdentify(),
-            options?.toAndroidEventOptions()
+            options?.toAndroidEventOptions(),
         )
         return this
     }
@@ -226,19 +237,21 @@ public actual class Amplitude internal constructor(
     // ========================================
 
     public actual fun add(plugin: Plugin): Amplitude {
-        val adapter = pluginLock.withLock {
-            if (pluginAdapters.any { it.first === plugin }) return this
-            plugin.toAndroidPlugin(this).also { pluginAdapters.add(plugin to it) }
-        }
+        val adapter =
+            pluginLock.withLock {
+                if (pluginAdapters.any { it.first === plugin }) return this
+                plugin.toAndroidPlugin(this).also { pluginAdapters.add(plugin to it) }
+            }
         androidAmplitude.add(adapter)
         return this
     }
 
     public actual fun remove(plugin: Plugin): Amplitude {
-        val adapter = pluginLock.withLock {
-            val index = pluginAdapters.indexOfFirst { it.first === plugin }
-            if (index < 0) null else pluginAdapters.removeAt(index).second
-        }
+        val adapter =
+            pluginLock.withLock {
+                val index = pluginAdapters.indexOfFirst { it.first === plugin }
+                if (index < 0) null else pluginAdapters.removeAt(index).second
+            }
         adapter?.let { androidAmplitude.remove(it) }
         return this
     }

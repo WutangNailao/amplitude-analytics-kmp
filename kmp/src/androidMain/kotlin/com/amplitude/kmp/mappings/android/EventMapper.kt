@@ -1,15 +1,15 @@
 package com.amplitude.kmp.mappings.android
 
+import com.amplitude.kmp.events.BaseEvent
+import com.amplitude.kmp.events.EventCallBack
+import com.amplitude.kmp.events.EventOptions
+import com.amplitude.kmp.events.IngestionMetadata
+import com.amplitude.kmp.events.Plan
+import com.amplitude.core.EventCallBack as AndroidEventCallBack
 import com.amplitude.core.events.BaseEvent as AndroidBaseEvent
 import com.amplitude.core.events.EventOptions as AndroidEventOptions
-import com.amplitude.core.events.Plan as AndroidPlan
 import com.amplitude.core.events.IngestionMetadata as AndroidIngestionMetadata
-import com.amplitude.core.EventCallBack as AndroidEventCallBack
-import com.amplitude.kmp.events.BaseEvent
-import com.amplitude.kmp.events.EventOptions
-import com.amplitude.kmp.events.EventCallBack
-import com.amplitude.kmp.events.Plan
-import com.amplitude.kmp.events.IngestionMetadata
+import com.amplitude.core.events.Plan as AndroidPlan
 
 /**
  * Map KMP BaseEvent to Android BaseEvent.
@@ -120,17 +120,18 @@ internal fun EventOptions.toAndroidEventOptions(): AndroidEventOptions {
 internal fun EventCallBack.toAndroidCallback(): AndroidEventCallBack {
     return { event, status, message ->
         // Convert Android BaseEvent back to KMP BaseEvent for callback
-        val kmpEvent = BaseEvent(
-            eventType = event.eventType,
-            eventProperties = event.eventProperties,
-            userProperties = event.userProperties,
-            groups = event.groups,
-            groupProperties = event.groupProperties
-        ).apply {
-            event.userId?.let { this.userId = it }
-            event.deviceId?.let { this.deviceId = it }
-            event.timestamp?.let { this.timestamp = it }
-        }
+        val kmpEvent =
+            BaseEvent(
+                eventType = event.eventType,
+                eventProperties = event.eventProperties,
+                userProperties = event.userProperties,
+                groups = event.groups,
+                groupProperties = event.groupProperties,
+            ).apply {
+                event.userId?.let { this.userId = it }
+                event.deviceId?.let { this.deviceId = it }
+                event.timestamp?.let { this.timestamp = it }
+            }
         this(kmpEvent, status, message)
     }
 }
@@ -143,7 +144,7 @@ internal fun Plan.toAndroidPlan(): AndroidPlan {
         branch = branch,
         source = source,
         version = version,
-        versionId = versionId
+        versionId = versionId,
     )
 }
 
@@ -153,6 +154,6 @@ internal fun Plan.toAndroidPlan(): AndroidPlan {
 internal fun IngestionMetadata.toAndroidIngestionMetadata(): AndroidIngestionMetadata {
     return AndroidIngestionMetadata(
         sourceName = sourceName,
-        sourceVersion = sourceVersion
+        sourceVersion = sourceVersion,
     )
 }

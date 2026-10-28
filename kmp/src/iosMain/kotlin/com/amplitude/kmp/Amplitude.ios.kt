@@ -3,8 +3,20 @@ package com.amplitude.kmp
 import cocoapods.AmplitudeSwift.AMPConfiguration
 import cocoapods.AmplitudeSwift.AMPIdentify
 import cocoapods.AmplitudeSwift.AMPPlugin
-import com.amplitude.kmp.events.*
-import com.amplitude.kmp.mappings.ios.*
+import com.amplitude.kmp.events.BaseEvent
+import com.amplitude.kmp.events.EventCallBack
+import com.amplitude.kmp.events.EventOptions
+import com.amplitude.kmp.events.Identify
+import com.amplitude.kmp.events.Revenue
+import com.amplitude.kmp.events.RevenueEvent
+import com.amplitude.kmp.mappings.ios.toIOSBaseEvent
+import com.amplitude.kmp.mappings.ios.toIOSCallback
+import com.amplitude.kmp.mappings.ios.toIOSConfiguration
+import com.amplitude.kmp.mappings.ios.toIOSEventOptions
+import com.amplitude.kmp.mappings.ios.toIOSIdentify
+import com.amplitude.kmp.mappings.ios.toIOSPlugin
+import com.amplitude.kmp.mappings.ios.toIOSRevenue
+import com.amplitude.kmp.mappings.ios.toNSObject
 import com.amplitude.kmp.plugins.Plugin
 import com.amplitude.kmp.utils.Lock
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -36,6 +48,7 @@ public actual class Amplitude internal constructor(
     public actual companion object {
         public actual val START_SESSION_EVENT: String = "session_start"
         public actual val END_SESSION_EVENT: String = "session_end"
+
         /**
          * Initialize Amplitude with Configuration.
          */
@@ -83,7 +96,7 @@ public actual class Amplitude internal constructor(
         iosAmplitude.track(
             event = event.toIOSBaseEvent(),
             options = options?.toIOSEventOptions(),
-            callback = callback?.toIOSCallback()
+            callback = callback?.toIOSCallback(),
         )
         return this
     }
@@ -95,18 +108,19 @@ public actual class Amplitude internal constructor(
     ): Amplitude {
         // FIX: Set userId/deviceId on KMP BaseEvent before converting to iOS BaseEvent
         // BaseEvent extends EventOptions, so it has userId and deviceId properties
-        val event = BaseEvent(
-            eventType = eventType,
-            eventProperties = eventProperties?.toMutableMap()
-        ).apply {
-            // Set userId/deviceId from SDK's stored identity if not already set
-            if (userId == null) {
-                userId = iosAmplitude.getUserId()
+        val event =
+            BaseEvent(
+                eventType = eventType,
+                eventProperties = eventProperties?.toMutableMap(),
+            ).apply {
+                // Set userId/deviceId from SDK's stored identity if not already set
+                if (userId == null) {
+                    userId = iosAmplitude.getUserId()
+                }
+                if (deviceId == null) {
+                    deviceId = iosAmplitude.getDeviceId()
+                }
             }
-            if (deviceId == null) {
-                deviceId = iosAmplitude.getDeviceId()
-            }
-        }
 
         // Merge any additional options
         options?.let { event.mergeEventOptions(it) }
@@ -131,7 +145,7 @@ public actual class Amplitude internal constructor(
         }
         iosAmplitude.identify(
             identify = identify,
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -142,7 +156,7 @@ public actual class Amplitude internal constructor(
     ): Amplitude {
         iosAmplitude.identify(
             identify = identify.toIOSIdentify(),
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -157,7 +171,7 @@ public actual class Amplitude internal constructor(
     ): Amplitude {
         iosAmplitude.revenue(
             revenue = revenue.toIOSRevenue(),
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -208,7 +222,7 @@ public actual class Amplitude internal constructor(
         iosAmplitude.setGroup(
             groupType = groupType,
             groupName = groupName,
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -221,7 +235,7 @@ public actual class Amplitude internal constructor(
         iosAmplitude.setGroup(
             groupType = groupType,
             groupNames = groupName.toList(),
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -241,7 +255,7 @@ public actual class Amplitude internal constructor(
             groupType = groupType,
             groupName = groupName,
             identify = identify,
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -256,7 +270,7 @@ public actual class Amplitude internal constructor(
             groupType = groupType,
             groupName = groupName,
             identify = identify.toIOSIdentify(),
-            options = options?.toIOSEventOptions()
+            options = options?.toIOSEventOptions(),
         )
         return this
     }
@@ -266,19 +280,21 @@ public actual class Amplitude internal constructor(
     // ========================================
 
     public actual fun add(plugin: Plugin): Amplitude {
-        val adapter = pluginLock.withLock {
-            if (pluginAdapters.any { it.first === plugin }) return this
-            plugin.toIOSPlugin(this).also { pluginAdapters.add(plugin to it) }
-        }
+        val adapter =
+            pluginLock.withLock {
+                if (pluginAdapters.any { it.first === plugin }) return this
+                plugin.toIOSPlugin(this).also { pluginAdapters.add(plugin to it) }
+            }
         iosAmplitude.add(plugin = adapter)
         return this
     }
 
     public actual fun remove(plugin: Plugin): Amplitude {
-        val adapter = pluginLock.withLock {
-            val index = pluginAdapters.indexOfFirst { it.first === plugin }
-            if (index < 0) null else pluginAdapters.removeAt(index).second
-        }
+        val adapter =
+            pluginLock.withLock {
+                val index = pluginAdapters.indexOfFirst { it.first === plugin }
+                if (index < 0) null else pluginAdapters.removeAt(index).second
+            }
         adapter?.let { iosAmplitude.remove(plugin = it) }
         return this
     }

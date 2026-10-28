@@ -6,7 +6,8 @@ package com.amplitude.kmp.utils
 internal actual class Lock {
     private val lock = Any()
 
-    actual inline fun <T> withLock(block: () -> T): T = synchronized(lock) {
-        block()
-    }
+    actual inline fun <T> withLock(block: () -> T): T =
+        synchronized(lock) {
+            block()
+        }
 }
