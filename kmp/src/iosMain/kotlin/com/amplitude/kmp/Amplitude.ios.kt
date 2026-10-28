@@ -34,16 +34,8 @@ public actual class Amplitude internal constructor(
     private val pluginAdapters = mutableListOf<Pair<Plugin, AMPPlugin>>()
 
     public actual companion object {
-        private var _instance: Amplitude? = null
-
         public actual val START_SESSION_EVENT: String = "session_start"
         public actual val END_SESSION_EVENT: String = "session_end"
-        
-        public actual fun getInstance(): Amplitude {
-            return _instance
-                ?: throw IllegalStateException("Amplitude not initialized. Call Amplitude(apiKey) first")
-        }
-
         /**
          * Initialize Amplitude with Configuration.
          */
@@ -52,7 +44,7 @@ public actual class Amplitude internal constructor(
             val iosInstance = createIOSAmplitudeInstance(iosConfig)
             configuration.deviceId?.let { iosInstance.setDeviceId(it) }
             configuration.sessionId?.let { iosInstance.setSessionIdWithTimestamp(it) }
-            return Amplitude(iosInstance).also { _instance = it }
+            return Amplitude(iosInstance)
         }
 
         /**

@@ -21,20 +21,13 @@ public actual class Amplitude internal constructor(
     private val pluginAdapters = mutableListOf<Pair<Plugin, AndroidPlugin>>()
 
     public actual companion object {
-        private var _instance: Amplitude? = null
-
         public actual val START_SESSION_EVENT: String = AndroidAmplitude.START_SESSION_EVENT
         public actual val END_SESSION_EVENT: String = AndroidAmplitude.END_SESSION_EVENT
-
-        public actual fun getInstance(): Amplitude {
-            return _instance
-                ?: throw IllegalStateException("Amplitude not initialized. Call Amplitude(apiKey, context) first")
-        }
 
         public actual operator fun invoke(configuration: Configuration): Amplitude {
             val androidConfig = configuration.toAndroidConfiguration()
             val androidInstance = AndroidAmplitude(androidConfig)
-            return Amplitude(androidInstance).also { _instance = it }
+            return Amplitude(androidInstance)
         }
 
         /**
@@ -49,7 +42,7 @@ public actual class Amplitude internal constructor(
             // Wait for build to complete
             androidInstance.isBuilt.await()
 
-            return Amplitude(androidInstance).also { _instance = it }
+            return Amplitude(androidInstance)
         }
 
         /**
