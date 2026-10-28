@@ -33,7 +33,7 @@ kotlin {
 
     // CocoaPods configuration for the native iOS SDK
     cocoapods {
-        version = "1.0.4"
+        version = project.version.toString()
         summary = "Amplitude Analytics KMP SDK"
         homepage = project.findProperty("POM_URL")?.toString() ?: ""
         ios.deploymentTarget = libs.versions.iosDeploymentTarget.get()

@@ -26,7 +26,7 @@ Add to your `build.gradle.kts`:
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.3")
+            implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.5")
         }
     }
 }
@@ -36,7 +36,7 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.3")
+    implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.5")
 }
 ```
 
@@ -561,7 +561,7 @@ The KMP SDK maintains **100% API compatibility** with the Android SDK. Migration
 // implementation("com.amplitude:analytics-android:X.X.X")
 
 // Add KMP SDK
-implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.3")
+implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.5")
 ```
 
 ### Step 2: Update Imports
