@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  android:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: ktlint
+            name: Code style
+            tasks: ':ktlintCheck :kmp:ktlintCheck :samples:kotlin-kmp-app:ktlintCheck'
+          - check: unit-tests
+            name: Unit tests (Android)
+            tasks: ':kmp:testDebugUnitTest :kmp:testReleaseUnitTest'
+          - check: lint
+            name: Android Lint
+            tasks: ':kmp:lintDebug :kmp:lintRelease'
+          - check: build
+            name: Android build
+            tasks: ':kmp:assembleDebug :kmp:assembleRelease'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle and validate wrapper
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-35' 'build-tools;34.0.0'
+
+      - name: Run ${{ matrix.name }}
+        run: ./gradlew ${{ matrix.tasks }} --no-daemon --stacktrace
+
+      - name: Upload reports and available AARs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-${{ matrix.check }}
+          path: |
+            kmp/build/outputs/aar/
+            kmp/build/reports/
+            kmp/build/test-results/
+            build/reports/ktlint/
+            samples/kotlin-kmp-app/build/reports/ktlint/
+          if-no-files-found: warn
+          retention-days: 7
+
+  ios:
+    name: ${{ matrix.name }}
+    runs-on: macos-15
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: unit-tests
+            name: Unit tests (iOS)
+            tasks: ':kmp:iosSimulatorArm64Test'
+          - check: build
+            name: iOS build
+            tasks: ':kmp:linkDebugFrameworkIosArm64 :kmp:linkDebugFrameworkIosSimulatorArm64 :kmp:linkDebugFrameworkIosX64'
+    env:
+      # Xcode 16.4 supports the project's iOS 13 deployment target.
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Install CocoaPods 1.16.2
+        run: |
+          gem install cocoapods --version 1.16.2 --no-document
+          pod --version
+
+      - name: Set up Gradle and validate wrapper
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Run ${{ matrix.name }}
+        run: ./gradlew ${{ matrix.tasks }} --no-daemon --stacktrace
+
+      - name: Upload test reports and resolved pod versions
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-${{ matrix.check }}
+          path: |
+            kmp/build/reports/tests/
+            kmp/build/test-results/
+            kmp/build/cocoapods/synthetic/ios/Podfile.lock
+          if-no-files-found: warn
+          retention-days: 7
