@@ -2,7 +2,14 @@
 
 Notable changes to amplitude-analytics-kmp are documented here.
 
-## [Unreleased]
+## [1.0.6] - 2026-10-29
+
+### Compatibility
+
+- Published Kotlin metadata now uses Kotlin 2.4; consumers need a compatible
+  Kotlin compiler and must rebuild.
+- SDK minimum platforms remain Android API 21 and iOS 13. The upgraded Compose
+  sample separately requires Android API 23 / compileSdk 37 and iOS 14.1.
 
 ### Build
 
@@ -12,10 +19,25 @@ Notable changes to amplitude-analytics-kmp are documented here.
   extract the sample Android application into `samples/android-app`.
 - Replace Debug/Release SDK tasks with the single Android KMP variant, update CI
   to Xcode 26.4, and verify sample APKs against staged Maven publications.
-- Keep SDK minimum platforms unchanged; the upgraded Compose sample separately
-  requires Android API 23 / compileSdk 37 and iOS 14.1.
-- Published Kotlin metadata now uses Kotlin 2.4; consumers need a compatible
-  Kotlin compiler and must rebuild.
+- Migrate Dokka to its v2 API and retain generated HTML documentation in all
+  Maven publications. Maven coordinates and the iOS framework name are unchanged.
+- Explicitly preserve the SDK's lower iOS deployment target and disable native
+  binary caches that embed an iOS 15 target, at the cost of longer Debug links.
+- Add an Android host-test regression test and keep existing ktlint formatting
+  rules while upgrading its Gradle integration.
+
+### Fixed
+
+- Correct the Android SDK package name to `platforms;android-37.0` in CI and
+  shared native setup so SDK installation succeeds.
+- Use `kotlin.time.Clock` in the shared sample for compatibility with the updated
+  Kotlin and Compose dependency graph.
+
+### Usage
+
+```kotlin
+implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.6")
+```
 
 ## [1.0.5] - 2026-10-29
 
