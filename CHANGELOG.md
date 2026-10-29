@@ -2,11 +2,7 @@
 
 Notable changes to amplitude-analytics-kmp are documented here.
 
-`1.0.5` is the next release and has not been published as part of preparing this
-changelog. Earlier entries describe the upstream Git tags; their dates are the
-corresponding tagged commit dates, not independently verified Maven publication dates.
-
-## [1.0.5] - Unreleased
+## [1.0.5] - 2026-10-29
 
 ### Breaking changes
 
