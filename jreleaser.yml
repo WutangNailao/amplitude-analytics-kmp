@@ -1,0 +1,37 @@
+project:
+  name: amplitude-analytics-kmp
+  description: Amplitude Kotlin Multiplatform SDK for Analytics
+  authors: [Nathan Fallet]
+  license: MIT
+  languages:
+    java:
+      groupId: io.github.wutangnailao
+
+# Invoked with `deploy` only. GitHub Releases are created separately with gh.
+signing:
+  pgp:
+    active: ALWAYS
+    armored: true
+    mode: COMMAND
+
+deploy:
+  maven:
+    mavenCentral:
+      sonatype:
+        active: RELEASE
+        url: https://central.sonatype.com/api/v1/publisher
+        stagingRepositories: [build/staging]
+        # PomChecker only understands standard Maven packaging. Central itself
+        # validates Android/native POMs; iOS publishes KLIBs, not JVM JARs.
+        artifactOverrides:
+          - artifactId: amplitude-analytics-kmp-android
+            verifyPom: false
+          - artifactId: amplitude-analytics-kmp-iosarm64
+            jar: false
+            verifyPom: false
+          - artifactId: amplitude-analytics-kmp-iossimulatorarm64
+            jar: false
+            verifyPom: false
+          - artifactId: amplitude-analytics-kmp-iosx64
+            jar: false
+            verifyPom: false

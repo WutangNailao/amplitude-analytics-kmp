@@ -1,0 +1,30 @@
+name: Set up native build
+description: Configure the macOS toolchain shared by CI and KMP packaging
+inputs:
+  android:
+    description: Install Android packages needed for KMP project configuration
+    default: 'false'
+  cache-read-only:
+    description: Whether the Gradle cache is read-only
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: '21'
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+    - name: Install CocoaPods
+      shell: bash
+      run: gem install cocoapods --version 1.16.2 --no-document
+    - uses: gradle/actions/setup-gradle@v6
+      with:
+        cache-provider: basic
+        cache-read-only: ${{ inputs.cache-read-only }}
+    - uses: android-actions/setup-android@v4
+      if: ${{ inputs.android == 'true' }}
+      with:
+        packages: 'platform-tools platforms;android-35 build-tools;35.0.0'

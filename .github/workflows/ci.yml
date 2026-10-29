@@ -5,6 +5,20 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to check
+        type: string
+        default: ''
+      skip-ios:
+        description: Caller provides its own consolidated iOS checks
+        type: boolean
+        default: false
+      release-packages:
+        description: Export the Android Maven publication from the existing build job
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -41,6 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ inputs.ref || github.sha }}
           persist-credentials: false
 
       - name: Set up JDK 21
@@ -61,7 +76,23 @@ jobs:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
       - name: Run ${{ matrix.name }}
-        run: ./gradlew ${{ matrix.tasks }} --no-daemon --stacktrace
+        env:
+          EXPORT_MAVEN: ${{ inputs.release-packages && matrix.check == 'build' }}
+        run: |
+          extra=()
+          if [[ "$EXPORT_MAVEN" == true ]]; then
+            extra+=(':kmp:publishAndroidReleasePublicationToMavenLocal' '-PsignAllPublications=false' "-Dmaven.repo.local=$RUNNER_TEMP/release-maven-android")
+          fi
+          ./gradlew ${{ matrix.tasks }} "${extra[@]}" --no-daemon --stacktrace
+
+      - name: Export the Android Maven publication for release review
+        if: ${{ inputs.release-packages && matrix.check == 'build' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-maven-android
+          path: ${{ runner.temp }}/release-maven-android/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload reports and available AARs
         if: ${{ always() }}
@@ -78,57 +109,35 @@ jobs:
           retention-days: 7
 
   ios:
-    name: ${{ matrix.name }}
+    name: iOS tests and build
+    needs: android
+    if: ${{ !inputs.skip-ios }}
     runs-on: macos-15
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - check: unit-tests
-            name: Unit tests (iOS)
-            tasks: ':kmp:iosSimulatorArm64Test'
-          - check: build
-            name: iOS build
-            tasks: ':kmp:linkDebugFrameworkIosArm64 :kmp:linkDebugFrameworkIosSimulatorArm64 :kmp:linkDebugFrameworkIosX64'
+    timeout-minutes: 60
     env:
       # Xcode 16.4 supports the project's iOS 13 deployment target.
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ inputs.ref || github.sha }}
           persist-credentials: false
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v6
+      - uses: ./.github/actions/setup-native
         with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-
-      - name: Install CocoaPods 1.16.2
-        run: |
-          gem install cocoapods --version 1.16.2 --no-document
-          pod --version
-
-      - name: Set up Gradle and validate wrapper
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-provider: basic
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Run ${{ matrix.name }}
-        run: ./gradlew ${{ matrix.tasks }} --no-daemon --stacktrace
+      - name: Test and link iOS frameworks in one Gradle invocation
+        run: >-
+          ./gradlew :kmp:iosSimulatorArm64Test
+          :kmp:linkDebugFrameworkIosArm64 :kmp:linkDebugFrameworkIosSimulatorArm64
+          :kmp:linkDebugFrameworkIosX64 --continue --no-daemon --stacktrace
 
       - name: Upload test reports and resolved pod versions
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: ios-${{ matrix.check }}
+          name: ios-reports
           path: |
             kmp/build/reports/tests/
             kmp/build/test-results/

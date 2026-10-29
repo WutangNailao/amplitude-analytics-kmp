@@ -1,0 +1,250 @@
+name: Release
+
+on:
+  push:
+    tags: ['[0-9]*.[0-9]*.[0-9]*', 'v[0-9]*.[0-9]*.[0-9]*']
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Check only, or publish after checks pass
+        type: choice
+        options: [check, publish]
+        default: check
+      tag:
+        description: Existing release tag (required for publishing from a branch)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-publication
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.metadata.outputs.sha }}
+      version: ${{ steps.metadata.outputs.version }}
+      tag: ${{ steps.metadata.outputs.tag }}
+      publish: ${{ steps.metadata.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check version, tag and release notes
+        id: metadata
+        env:
+          TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name || '') }}
+          PUBLISH: ${{ github.event_name == 'push' || inputs.mode == 'publish' }}
+        run: |
+          python3 - <<'PY'
+          import datetime, os, pathlib, re, subprocess
+
+          def check(condition, message):
+              if not condition:
+                  raise SystemExit(message)
+
+          props = dict(re.findall(r'^([A-Z_]+)=(.*)$', pathlib.Path('gradle.properties').read_text(), re.M))
+          version, tag, publish = props['VERSION_NAME'], os.environ['TAG'], os.environ['PUBLISH']
+          check(re.fullmatch(r'\d+\.\d+\.\d+', version), 'VERSION_NAME must be X.Y.Z')
+          check(not tag or tag in (version, 'v' + version), 'Tag must match VERSION_NAME')
+          check(publish != 'true' or tag, 'Publishing requires an existing version tag')
+          entries = re.findall(r'^## \[' + re.escape(version) + r'\] - (\d{4}-\d{2}-\d{2})\n(.*?)(?=^## |\Z)',
+                               pathlib.Path('CHANGELOG.md').read_text(), re.M | re.S)
+          check(len(entries) == 1, 'CHANGELOG must contain one dated entry for this version, not Unreleased')
+          date, notes = entries[0]
+          check(datetime.date.fromisoformat(date) <= datetime.date.today(), 'Release date is in the future')
+          check(notes.strip(), 'Release notes must not be empty')
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          if tag:
+              tagged = subprocess.check_output(['git', 'rev-parse', f'refs/tags/{tag}^{{commit}}'], text=True).strip()
+              check(tagged == sha, 'Tag does not point at this commit')
+          if publish == 'true':
+              subprocess.run(['git', 'merge-base', '--is-ancestor', sha, 'origin/main'], check=True)
+          target = pathlib.Path('build/release/notes.md')
+          target.parent.mkdir(parents=True, exist_ok=True)
+          target.write_text(f'## [{version}] - {date}\n{notes.strip()}\n\n'
+                            f'```kotlin\nimplementation("{props["GROUP"]}:amplitude-analytics-kmp:{version}")\n```\n')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              for key, value in dict(sha=sha, version=version, tag=tag, publish=publish).items():
+                  output.write(f'{key}={value}\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-notes
+          path: build/release/notes.md
+          if-no-files-found: error
+          retention-days: 14
+
+  checks:
+    needs: metadata
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.metadata.outputs.sha }}
+      skip-ios: true
+      release-packages: true
+
+  native:
+    name: iOS checks and native publications
+    needs: [metadata, checks]
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-native
+        with:
+          android: 'true'
+      - name: Test, link and stage Maven publications once
+        run: >-
+          ./gradlew :kmp:iosSimulatorArm64Test
+          :kmp:linkDebugFrameworkIosArm64 :kmp:linkDebugFrameworkIosSimulatorArm64
+          :kmp:linkDebugFrameworkIosX64 :kmp:linkReleaseFrameworkIosArm64
+          :kmp:linkReleaseFrameworkIosSimulatorArm64 :kmp:linkReleaseFrameworkIosX64
+          :kmp:publishKotlinMultiplatformPublicationToMavenLocal
+          :kmp:publishIosArm64PublicationToMavenLocal
+          :kmp:publishIosSimulatorArm64PublicationToMavenLocal
+          :kmp:publishIosX64PublicationToMavenLocal -PsignAllPublications=false
+          -Dmaven.repo.local="$RUNNER_TEMP/release-maven"
+          --continue --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-maven-native
+          path: ${{ runner.temp }}/release-maven/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() }}
+        with:
+          name: release-native-reports
+          path: |
+            kmp/build/reports/
+            kmp/build/cocoapods/synthetic/ios/Podfile.lock
+          if-no-files-found: warn
+          retention-days: 14
+
+  review:
+    name: Review staged publications
+    needs: [metadata, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: release-maven-*
+          merge-multiple: true
+          path: build/staging
+      - name: Check all five publications are present
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+        run: |
+          group=$(sed -n 's/^GROUP=//p' gradle.properties | tr . /)
+          for suffix in '' -android -iosarm64 -iossimulatorarm64 -iosx64; do
+            artifact="amplitude-analytics-kmp${suffix}"
+            base="build/staging/${group}/${artifact}/${VERSION}/${artifact}-${VERSION}"
+            case "$suffix" in '') binary=jar ;; -android) binary=aar ;; *) binary=klib ;; esac
+            for file in "$base.pom" "$base.module" "$base-sources.jar" "$base-javadoc.jar" "$base.$binary"; do
+              test -s "$file" || { echo "Missing publication file: $file"; exit 1; }
+            done
+          done
+          find build/staging -name maven-metadata-local.xml -delete
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-maven
+          path: build/staging/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Sign and publish with JReleaser
+    needs: [metadata, review]
+    if: ${{ needs.metadata.outputs.publish == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: release
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-maven
+          path: build/staging
+      - uses: crazy-max/ghaction-import-gpg@v7
+        id: gpg
+        with:
+          gpg_private_key: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+          passphrase: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+      - uses: jreleaser/release-action@2.5.0
+        with:
+          version: '1.26.0'
+          arguments: deploy
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ github.token }}
+          JRELEASER_PROJECT_VERSION: ${{ needs.metadata.outputs.version }}
+          JRELEASER_TAG_NAME: ${{ needs.metadata.outputs.tag }}
+          JRELEASER_GPG_KEYNAME: ${{ steps.gpg.outputs.fingerprint }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+          JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() }}
+        with:
+          name: release-deployment-info
+          path: out/jreleaser/output.properties
+          if-no-files-found: ignore
+          retention-days: 14
+
+  github-release:
+    name: Create GitHub Release
+    needs: [metadata, publish]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-notes
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-maven
+          path: build/staging
+      - name: Create release with the staged Android AAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.metadata.outputs.tag }}
+          VERSION: ${{ needs.metadata.outputs.version }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; leaving it unchanged."
+          else
+            aar=$(find build/staging -name "amplitude-analytics-kmp-android-${VERSION}.aar")
+            test -f "$aar"
+            gh release create "$TAG" "$aar" --verify-tag --title "$VERSION" --notes-file build/release/notes.md
+          fi
