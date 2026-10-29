@@ -97,10 +97,10 @@ jobs:
   native:
     name: iOS checks and native publications
     needs: [metadata, checks]
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 90
     env:
-      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_26.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v7
         with:
@@ -121,6 +121,10 @@ jobs:
           :kmp:publishIosX64PublicationToMavenLocal -PsignAllPublications=false
           -Dmaven.repo.local="$RUNNER_TEMP/release-maven"
           --continue --no-daemon --stacktrace
+      - name: Verify the shared iOS sample consumes staged publications
+        run: >-
+          ./gradlew :samples:kotlin-kmp-app:linkDebugFrameworkIosSimulatorArm64
+          -Dmaven.repo.local="$RUNNER_TEMP/release-maven" --no-daemon --stacktrace
       - uses: actions/upload-artifact@v7
         with:
           name: release-maven-native

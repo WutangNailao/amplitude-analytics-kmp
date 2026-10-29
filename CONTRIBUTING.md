@@ -32,7 +32,10 @@ amplitude-analytics-kmp/
 │   │   ├── iosMain/               # iOS implementation and type converters
 │   │   └── iosTest/               # iOS tests
 │   └── build.gradle.kts
-├── samples/                       # Sample applications
+├── samples/
+│   ├── kotlin-kmp-app/             # Shared Compose UI and iOS framework
+│   ├── android-app/                # Standalone Android application (AGP built-in Kotlin)
+│   └── kotlin-kmp-app-ios/          # Xcode application
 ├── docs/                          # Usage and known limitations
 ├── CONTRIBUTING.md                # Development and contribution guide
 └── README.md                      # Project overview
@@ -40,16 +43,46 @@ amplitude-analytics-kmp/
 
 ## Building
 
+Use JDK 21. The build uses Gradle 9.7.0, AGP 9.3.1 and Kotlin 2.4.21,
+within Kotlin's fully supported compatibility range. Native builds require
+Xcode 26.4 and CocoaPods; CI uses the macOS 26 image.
+
+Both KMP modules use `com.android.kotlin.multiplatform.library`, which produces
+one Android variant rather than separate Debug/Release variants. The Android app
+is a separate module and uses AGP's built-in Kotlin support, not
+`org.jetbrains.kotlin.android`. Dokka uses its v2 API. The ktlint Gradle plugin is
+updated, while its engine remains pinned to 1.0.1 to retain existing style rules.
+
+The SDK retains Android API 21 / compileSdk 35 and iOS 13. Kotlin/Native's newer
+iOS 15 default is explicitly overridden for framework and test binaries. The
+Compose sample separately requires Android API 23 / compileSdk 37 and iOS 14.1.
+Native binary caches are disabled through Kotlin 2.4.21's version-scoped DSL
+because the precompiled ARM64 caches embed an iOS 15 target. This trades longer
+native Debug links for the lower deployment targets; review it on Kotlin upgrades.
+Deployment settings do not replace runtime testing on the oldest supported OS.
+The AAR explicitly keeps its consumer compileSdk floor at API 21 instead of
+inheriting AGP 9's new compileSdk-35 default. Published Kotlin metadata now uses
+Kotlin 2.4; consumers need a compatible Kotlin compiler and must rebuild.
+
 Run commands from the repository root:
 
 ```bash
-./gradlew build
+./gradlew :kmp:assembleAndroidMain
+
+# Publish the SDK before building the sample, which consumes Maven coordinates.
+./gradlew :kmp:publishToMavenLocal -PsignAllPublications=false
+./gradlew :samples:android-app:assembleDebug
 ```
+
+On Linux, publish only `:kmp:publishKotlinMultiplatformPublicationToMavenLocal`
+and `:kmp:publishAndroidPublicationToMavenLocal`; Apple publications need macOS.
+To use an isolated Maven Local, pass the same `-Dmaven.repo.local=<directory>`
+to both publication and sample build commands.
 
 ## Running Tests
 
 ```bash
-./gradlew :kmp:testDebugUnitTest
+./gradlew :kmp:testAndroidHostTest
 ./gradlew :kmp:iosSimulatorArm64Test
 ```
 
@@ -61,11 +94,11 @@ and manual dispatch. It does not publish packages or require publishing secrets.
 | Check | Environment | Scope |
 |---|---|---|
 | Code style | Ubuntu 24.04, JDK 21 | Ktlint checks for the root project, library, and sample sources/scripts; no automatic formatting |
-| Unit tests (Android) | Ubuntu 24.04, JDK 21 | Debug and Release unit-test tasks for `:kmp` |
-| Unit tests (iOS) | macOS 15 (ARM64), Xcode 16.4, JDK 21, CocoaPods 1.16.2 | Run `:kmp:iosSimulatorArm64Test` |
-| Android Lint | Ubuntu 24.04, JDK 21 | Debug and Release lint tasks for `:kmp` |
-| Android build | Ubuntu 24.04, JDK 21, Gradle Wrapper | Debug and Release AARs for `:kmp` |
-| iOS build | macOS 15 (ARM64), Xcode 16.4, JDK 21, CocoaPods 1.16.2 | Link Debug frameworks for `iosArm64`, `iosSimulatorArm64`, and `iosX64` |
+| Unit tests (Android) | Ubuntu 24.04, JDK 21 | `:kmp:testAndroidHostTest`, including the Android mapper regression test |
+| Unit tests (iOS) | macOS 26 (ARM64), Xcode 26.4, JDK 21, CocoaPods 1.16.2 | Run `:kmp:iosSimulatorArm64Test` |
+| Android Lint | Ubuntu 24.04, JDK 21 | `:kmp:lint`, with the standalone `com.android.lint` plugin providing KMP main-source analysis |
+| Android build | Ubuntu 24.04, JDK 21, Gradle Wrapper | Single SDK AAR, local Maven publications, and sample Debug/Release APKs consuming those publications |
+| iOS build | macOS 26 (ARM64), Xcode 26.4, JDK 21, CocoaPods 1.16.2 | Link Debug frameworks for all three architectures, then link the sample simulator framework against local Maven publications |
 
 The workflow uses the standard Gradle setup/cache action and uploads available
 Android AARs, lint/style/test reports, and the resolved CocoaPods lockfile as short-lived artifacts.
@@ -76,6 +109,8 @@ Android/style checks run as independent matrix jobs with `fail-fast: false`.
 Only after they pass does one macOS job run both iOS tests and Debug framework
 builds. This avoids spending macOS capacity on changes already rejected by Linux
 checks, and shares CocoaPods setup, cinterop output, and the Gradle task graph.
+It stages root/iOS Maven publications before a separate sample framework build,
+so shared sample sources and consumption of native SDK artifacts are checked too.
 Gradle's `--continue` allows independent iOS tasks to report failures in the same
 invocation; any failure still fails the job. No build/test step uses
 `continue-on-error`, and CI does not autoformat source files.
@@ -84,9 +119,10 @@ If branch protection previously required the separate `Unit tests (iOS)` and
 `iOS build` matrix checks, replace them with the combined `iOS tests and build`
 check. The Android check names are unchanged.
 
-CI checks the library and Kotlin formatting, not the sample app's Maven consumption
-or package publication. There are currently no Android unit-test source files;
-the Android test tasks still check their configured dependencies and test setup.
+The Android build job publishes SDK root metadata and its Android artifact to an
+isolated Maven Local, then builds both sample APK variants against those files.
+The release workflow separately stages `publishAndroidPublicationToMavenLocal`.
+The `-android` Maven coordinates are unchanged despite the publication task rename.
 
 ## Publishing to Maven Local
 

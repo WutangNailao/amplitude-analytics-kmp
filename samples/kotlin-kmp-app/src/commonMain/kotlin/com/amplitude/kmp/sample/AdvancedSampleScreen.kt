@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.amplitude.kmp.events.Identify
 import com.amplitude.kmp.events.Revenue
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -2,6 +2,21 @@
 
 Notable changes to amplitude-analytics-kmp are documented here.
 
+## [Unreleased]
+
+### Build
+
+- Upgrade to Gradle 9.7.0, AGP 9.3.1 and Kotlin 2.4.21; update Dokka,
+  Maven Publish, ktlint integration and Compose Multiplatform for this toolchain.
+- Migrate KMP Android targets to `com.android.kotlin.multiplatform.library` and
+  extract the sample Android application into `samples/android-app`.
+- Replace Debug/Release SDK tasks with the single Android KMP variant, update CI
+  to Xcode 26.4, and verify sample APKs against staged Maven publications.
+- Keep SDK minimum platforms unchanged; the upgraded Compose sample separately
+  requires Android API 23 / compileSdk 37 and iOS 14.1.
+- Published Kotlin metadata now uses Kotlin 2.4; consumers need a compatible
+  Kotlin compiler and must rebuild.
+
 ## [1.0.5] - 2026-10-29
 
 ### Breaking changes

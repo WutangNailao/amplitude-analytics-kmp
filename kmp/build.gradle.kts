@@ -1,10 +1,20 @@
+@file:OptIn(KotlinNativeCacheApi::class)
+
+import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.SourcesJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.DisableCacheInKotlinVersion
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCacheApi
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.android.lint)
     alias(libs.plugins.kotlin.cocoapods)
     alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.dokka)
 }
 
 kotlin {
@@ -12,11 +22,28 @@ kotlin {
     explicitApi()
 
     // Android target
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+    android {
+        namespace = "com.amplitude.kmp"
+        compileSdk = libs.versions.androidCompileSdk.get().toInt()
+        minSdk = libs.versions.androidMinSdk.get().toInt()
+
+        // AGP 9 otherwise raises the consumer compileSdk floor to our compileSdk.
+        aarMetadata {
+            minCompileSdk = libs.versions.androidMinSdk.get().toInt()
         }
-        publishLibraryVariants("release")
+
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+        }
+
+        withHostTest {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+
+        lint {
+            targetSdk = libs.versions.androidTargetSdk.get().toInt()
+        }
     }
 
     // iOS targets
@@ -56,77 +83,50 @@ kotlin {
     // Source sets
     sourceSets {
         // Common
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
             }
         }
 
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
             }
         }
 
         // Android
-        val androidMain by getting {
+        androidMain {
             dependencies {
                 implementation(libs.amplitude.android)
                 implementation(libs.kotlinx.coroutines.android)
             }
         }
 
-        // iOS - Create a common iOS source set
-        val iosMain by creating {
-            dependsOn(commonMain)
-        }
-
-        val iosX64Main by getting {
-            dependsOn(iosMain)
-        }
-
-        val iosArm64Main by getting {
-            dependsOn(iosMain)
-        }
-
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
-        }
-
         // Tests
-        val androidUnitTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(libs.mockk)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.test.core)
             }
         }
-
-        val iosTest by creating {
-            dependsOn(commonTest)
-        }
-
-        val iosX64Test by getting {
-            dependsOn(iosTest)
-        }
-
-        val iosArm64Test by getting {
-            dependsOn(iosTest)
-        }
-
-        val iosSimulatorArm64Test by getting {
-            dependsOn(iosTest)
-        }
     }
 
     // Compiler options
-    targets.all {
-        compilations.all {
-            compilerOptions.configure {
-                // Enable expect/actual classes
-                freeCompilerArgs.add("-Xexpect-actual-classes")
-            }
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
+    // Kotlin/Native defaults to iOS 15; retain the SDK's existing deployment target.
+    targets.withType<KotlinNativeTarget>().configureEach {
+        binaries.configureEach {
+            freeCompilerArgs += "-Xoverride-konan-properties=minVersion.ios=${libs.versions.iosDeploymentTarget.get()}"
+            disableNativeCache(
+                version = DisableCacheInKotlinVersion.`2_4_21`,
+                reason = "Precompiled ARM64 caches target iOS 15, above the SDK's iOS 13 deployment target",
+            )
         }
     }
 
@@ -137,43 +137,6 @@ kotlin {
                 optIn("kotlinx.cinterop.ExperimentalForeignApi")
             }
         }
-    }
-}
-
-android {
-    namespace = "com.amplitude.kmp"
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.androidMinSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    testOptions {
-        targetSdk = libs.versions.androidTargetSdk.get().toInt()
-        unitTests.isIncludeAndroidResources = true
-        unitTests.isReturnDefaultValues = true
-    }
-
-    lint {
-        targetSdk = libs.versions.androidTargetSdk.get().toInt()
     }
 }
 
@@ -213,7 +176,8 @@ mavenPublishing {
 
     configure(
         KotlinMultiplatform(
-            sourcesJar = true,
+            javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml"),
+            sourcesJar = SourcesJar.Sources(),
         ),
     )
 }

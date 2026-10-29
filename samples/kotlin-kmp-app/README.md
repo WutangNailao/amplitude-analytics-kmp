@@ -2,6 +2,11 @@
 
 This sample demonstrates how to use the Amplitude Kotlin Multiplatform SDK in a real application with **shared initialization logic** across Android and iOS.
 
+This module is a KMP library containing the shared Compose UI and iOS framework.
+The Android entry point, manifest, resources and BuildConfig live in
+[`../android-app`](../android-app). The sample requires Android API 23+ (compileSdk 37)
+or iOS 14.1+; these are separate from the SDK's Android API 21 / iOS 13 minimums.
+
 ## Features Demonstrated
 
 ### Basic Events (`BasicSampleScreen.kt`)
@@ -43,7 +48,8 @@ actual val amplitudeApiKey: String = "your_ios_api_key_here"
 
 **Android:**
 ```bash
-./gradlew :samples:kotlin-kmp-app:installDebug
+./gradlew :kmp:publishToMavenLocal -PsignAllPublications=false
+./gradlew :samples:android-app:installDebug
 ```
 
 **iOS:**
@@ -64,9 +70,7 @@ src/
 │   ├── BasicSampleScreen.kt      # Basic event tracking examples
 │   └── AdvancedSampleScreen.kt   # Advanced features (Identify, Revenue, Groups)
 ├── androidMain/         # Android-specific code
-│   ├── MainActivity.kt
-│   ├── MainApplication.kt        # Stores Android context
-│   ├── AmplitudeConfig.android.kt # Android API key from BuildConfig
+│   ├── AmplitudeConfig.android.kt # Context/API key supplied by the Android app
 │   └── Platform.android.kt       # Returns "Android"
 └── iosMain/             # iOS-specific code
     ├── MainViewController.kt     # iOS entry point
@@ -88,9 +92,9 @@ expect val platformContext: Any?  // Android Context or null for iOS
 
 **androidMain/AmplitudeConfig.android.kt:**
 ```kotlin
-internal var androidContext: Context? = null
-actual val amplitudeApiKey: String = BuildConfig.AMPLITUDE_API_KEY
-actual val platformContext: Any? get() = androidContext
+// In ../android-app/MainApplication.onCreate(), before displaying App():
+configureAndroidSample(applicationContext, BuildConfig.AMPLITUDE_API_KEY)
+// The shared module's actual properties read this configuration.
 ```
 
 **iosMain/AmplitudeConfig.ios.kt:**
@@ -174,8 +178,8 @@ fun App() {
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // Just store the context - initialization happens in App.kt
-        androidContext = applicationContext
+        // Supply configuration; Amplitude initialization still happens in App.kt.
+        configureAndroidSample(applicationContext, BuildConfig.AMPLITUDE_API_KEY)
     }
 }
 ```

@@ -10,7 +10,6 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Store Android context for Amplitude initialization
-        androidContext = applicationContext
+        configureAndroidSample(applicationContext, AMPLITUDE_API_KEY)
     }
 }

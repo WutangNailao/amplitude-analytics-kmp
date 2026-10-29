@@ -4,6 +4,10 @@ This is the iOS wrapper for the Amplitude KMP sample app, which uses Compose Mul
 
 ## Setup
 
+Use JDK 21 and Xcode 26.4 or newer. The Compose sample targets iOS 14.1+;
+the SDK itself retains its iOS 13 deployment target. Publish the SDK to Maven Local
+before building this consumer: `./gradlew :kmp:publishToMavenLocal -PsignAllPublications=false`.
+
 ### 1. Configure Your API Key
 
 Edit `../kotlin-kmp-app/src/iosMain/kotlin/com/amplitude/kmp/sample/AmplitudeConfig.ios.kt`:

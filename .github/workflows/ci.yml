@@ -42,16 +42,16 @@ jobs:
         include:
           - check: ktlint
             name: Code style
-            tasks: ':ktlintCheck :kmp:ktlintCheck :samples:kotlin-kmp-app:ktlintCheck'
+            tasks: ':ktlintCheck :kmp:ktlintCheck :samples:kotlin-kmp-app:ktlintCheck :samples:android-app:ktlintCheck'
           - check: unit-tests
             name: Unit tests (Android)
-            tasks: ':kmp:testDebugUnitTest :kmp:testReleaseUnitTest'
+            tasks: ':kmp:testAndroidHostTest'
           - check: lint
             name: Android Lint
-            tasks: ':kmp:lintDebug :kmp:lintRelease'
+            tasks: ':kmp:lint'
           - check: build
             name: Android build
-            tasks: ':kmp:assembleDebug :kmp:assembleRelease'
+            tasks: ':kmp:assembleAndroidMain'
     steps:
       - uses: actions/checkout@v7
         with:
@@ -73,7 +73,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+          packages: 'platform-tools platforms;android-35 platforms;android-37 build-tools;36.0.0'
 
       - name: Run ${{ matrix.name }}
         env:
@@ -81,9 +81,17 @@ jobs:
         run: |
           extra=()
           if [[ "$EXPORT_MAVEN" == true ]]; then
-            extra+=(':kmp:publishAndroidReleasePublicationToMavenLocal' '-PsignAllPublications=false' "-Dmaven.repo.local=$RUNNER_TEMP/release-maven-android")
+            extra+=(':kmp:publishAndroidPublicationToMavenLocal' '-PsignAllPublications=false' "-Dmaven.repo.local=$RUNNER_TEMP/release-maven-android")
           fi
           ./gradlew ${{ matrix.tasks }} "${extra[@]}" --no-daemon --stacktrace
+
+      - name: Verify the Android sample consumes Maven publications
+        if: ${{ matrix.check == 'build' }}
+        run: |
+          ./gradlew :kmp:publishKotlinMultiplatformPublicationToMavenLocal :kmp:publishAndroidPublicationToMavenLocal \
+            -PsignAllPublications=false -Dmaven.repo.local="$RUNNER_TEMP/sample-maven" --no-daemon --stacktrace
+          ./gradlew :samples:android-app:assembleDebug :samples:android-app:assembleRelease \
+            -Dmaven.repo.local="$RUNNER_TEMP/sample-maven" --no-daemon --stacktrace
 
       - name: Export the Android Maven publication for release review
         if: ${{ inputs.release-packages && matrix.check == 'build' }}
@@ -105,6 +113,8 @@ jobs:
             kmp/build/test-results/
             build/reports/ktlint/
             samples/kotlin-kmp-app/build/reports/ktlint/
+            samples/android-app/build/reports/
+            samples/android-app/build/outputs/apk/
           if-no-files-found: warn
           retention-days: 7
 
@@ -112,11 +122,10 @@ jobs:
     name: iOS tests and build
     needs: android
     if: ${{ !inputs.skip-ios }}
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     env:
-      # Xcode 16.4 supports the project's iOS 13 deployment target.
-      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_26.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v7
         with:
@@ -125,13 +134,24 @@ jobs:
 
       - uses: ./.github/actions/setup-native
         with:
+          android: 'true'
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Test and link iOS frameworks in one Gradle invocation
+      - name: Test, link and stage iOS publications in one Gradle invocation
         run: >-
           ./gradlew :kmp:iosSimulatorArm64Test
           :kmp:linkDebugFrameworkIosArm64 :kmp:linkDebugFrameworkIosSimulatorArm64
-          :kmp:linkDebugFrameworkIosX64 --continue --no-daemon --stacktrace
+          :kmp:linkDebugFrameworkIosX64
+          :kmp:publishKotlinMultiplatformPublicationToMavenLocal
+          :kmp:publishIosArm64PublicationToMavenLocal
+          :kmp:publishIosSimulatorArm64PublicationToMavenLocal
+          -PsignAllPublications=false -Dmaven.repo.local="$RUNNER_TEMP/sample-maven"
+          --continue --no-daemon --stacktrace
+
+      - name: Verify the shared iOS sample consumes Maven publications
+        run: >-
+          ./gradlew :samples:kotlin-kmp-app:linkDebugFrameworkIosSimulatorArm64
+          -Dmaven.repo.local="$RUNNER_TEMP/sample-maven" --no-daemon --stacktrace
 
       - name: Upload test reports and resolved pod versions
         if: ${{ always() }}

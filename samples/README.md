@@ -7,6 +7,10 @@ This directory contains sample applications demonstrating how to use the Amplitu
 ### kotlin-kmp-app
 A complete Kotlin Multiplatform sample app using Compose Multiplatform.
 
+`kotlin-kmp-app` contains the shared UI and iOS framework. `android-app` is the
+standalone Android application required by the AGP 9 project model. Use JDK 21;
+the Android sample needs API 23+ and compileSdk 37, and the iOS sample needs iOS 14.1+.
+
 **Features:**
 - Basic event tracking
 - Events with properties and options
@@ -31,11 +35,14 @@ A complete Kotlin Multiplatform sample app using Compose Multiplatform.
 ### Android
 
 ```bash
+# Publish the SDK first (Apple publications require macOS).
+./gradlew :kmp:publishToMavenLocal -PsignAllPublications=false
+
 # Build and install on device/emulator
-./gradlew :samples:kotlin-kmp-app:installDebug
+./gradlew :samples:android-app:installDebug
 
 # Or just build
-./gradlew :samples:kotlin-kmp-app:assembleDebug
+./gradlew :samples:android-app:assembleDebug
 ```
 
 ### iOS
@@ -61,7 +68,8 @@ Before running the samples, you need to configure your Amplitude API keys.
 
 > **Security Note**: `local.properties` is gitignored and will NOT be committed. Your API keys stay secure!
 
-The Android app will automatically load this via `BuildConfig.AMPLITUDE_API_KEY`.
+The Android app loads this via `BuildConfig.AMPLITUDE_API_KEY` and passes the key
+and application context to `configureAndroidSample()` before showing the shared UI.
 
 ### iOS API Key Setup
 
