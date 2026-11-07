@@ -46,4 +46,24 @@ class EventMapperTest {
         assertEquals("settings", revenue.properties().get("source"))
         assertTrue(revenue.properties().get("optional") is NSNull)
     }
+
+    @Test
+    fun revenuePreservesReceiptAndSignatureIndependently() {
+        val receipts = listOf(null, "receipt-data")
+        val signatures = listOf(null, "signature-data")
+
+        for (receipt in receipts) {
+            for (signature in signatures) {
+                val revenue =
+                    Revenue().apply {
+                        price = 29.9
+                        this.receipt = receipt
+                        receiptSig = signature
+                    }.toIOSRevenue()
+
+                assertEquals(receipt, revenue.receipt(), "receipt=$receipt, signature=$signature")
+                assertEquals(signature, revenue.receiptSig(), "receipt=$receipt, signature=$signature")
+            }
+        }
+    }
 }

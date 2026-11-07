@@ -152,6 +152,7 @@ internal fun Revenue.toIOSRevenue(): AMPRevenue {
     currency?.let { revenue.setCurrency(it) }
     this.revenue?.let { revenue.setRevenue(it) }
     receipt?.let { revenue.setReceipt(it) }
+    receiptSig?.let { revenue.setReceiptSig(it) }
 
     // Mutate the contents of the read-only AMPProperties wrapper.
     properties?.forEach { (key, value) ->

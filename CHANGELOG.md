@@ -15,6 +15,12 @@ Notable changes to amplitude-analytics-kmp are documented here.
   convenience APIs. Construct instances with `Amplitude(configuration)`; Android
   initialization remains asynchronous, with no KMP completion-wait API.
 
+### Fixed
+
+- Preserve `Revenue.receiptSig` when mapping to the native iOS Revenue object.
+- Preserve 64-bit session and Identify batch durations on iOS without narrowing
+  through a 32-bit integer.
+
 ## [1.0.6] - 2026-10-29
 
 ### Compatibility
