@@ -318,7 +318,7 @@ Android 专属的 `invokeAndAwait()`、`awaitInitialization()` 便利接口也�
 的可选事件回调仍然保留，但 KMP 不再提供回调转协程封装，也不额外承诺等待操作完成。
 
 旧 Identify／Revenue 协程接口使用 track 而非原生专用入口，以及 Map 接口将 null 转为空字符串的路径，均随接口删除。
-迁移说明见 [Unreleased 变更记录](../CHANGELOG.md#unreleased)。
+迁移说明见 [1.1.0 变更记录](../CHANGELOG.md#110---2026-11-07)。
 
 两端公开 `Amplitude.flush()` 都没有提供“全部事件上传成功”的完成信号，KMP 不提供对应等待接口。
 

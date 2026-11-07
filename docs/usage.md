@@ -26,7 +26,7 @@ Add to your `build.gradle.kts`:
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.5")
+            implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.1.0")
         }
     }
 }
@@ -36,7 +36,7 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.5")
+    implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.1.0")
 }
 ```
 
@@ -530,7 +530,7 @@ when using custom plugins, runtime configuration, or deprecated APIs.
 // implementation("com.amplitude:analytics-android:X.X.X")
 
 // Add KMP SDK
-implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.0.5")
+implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.1.0")
 ```
 
 ### Step 2: Update Imports

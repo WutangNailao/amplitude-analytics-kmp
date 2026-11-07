@@ -4,7 +4,12 @@ Notable changes to amplitude-analytics-kmp are documented here.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-07
+
 ### Breaking changes
+
+This release removes public APIs despite using a minor version number. Update
+affected imports and calls, and rebuild consumers before upgrading.
 
 - Remove KMP-only coroutine extensions: both `awaitTrack()` overloads, both
   `awaitIdentify()` overloads, `awaitRevenue()`, `awaitSetUserId()`,
@@ -24,6 +29,25 @@ Notable changes to amplitude-analytics-kmp are documented here.
 - Preserve `Revenue.receiptSig` when mapping to the native iOS Revenue object.
 - Preserve 64-bit session and Identify batch durations on iOS without narrowing
   through a 32-bit integer.
+
+### Changed
+
+- Upgrade the native Android SDK from 1.22.4 to 1.23.1 and raise the AmplitudeSwift
+  CocoaPods requirement from `~> 1.16.2` to `~> 1.16.6`. Existing shared tracking
+  APIs are unchanged by these dependency updates.
+- Document native API coverage, platform differences, and remaining wrapper gaps
+  in the English and Chinese compatibility guides. Correct the iOS installation
+  instructions to describe the current CocoaPods integration.
+
+### Migration
+
+```kotlin
+implementation("io.github.wutangnailao:amplitude-analytics-kmp:1.1.0")
+```
+
+Replace removed await helpers with the ordinary SDK calls listed above. These
+calls do not add initialization or upload-completion guarantees. Existing iOS
+custom-plugin and callback limitations remain; see [Known Limitations](docs/known-limitations.md).
 
 ## [1.0.6] - 2026-10-29
 
@@ -211,7 +235,10 @@ amplitude.flush() // Requests background uploads; does not wait for completion.
   plugin conversion rather than reconstructing events from their type alone.
 - Remove temporary iOS event/debug logging.
 
-[1.0.5]: https://github.com/wutangnailao/amplitude-analytics-kmp/compare/1.0.4...main
+[Unreleased]: https://github.com/wutangnailao/amplitude-analytics-kmp/compare/1.1.0...main
+[1.1.0]: https://github.com/wutangnailao/amplitude-analytics-kmp/compare/1.0.6...1.1.0
+[1.0.6]: https://github.com/wutangnailao/amplitude-analytics-kmp/compare/1.0.5...1.0.6
+[1.0.5]: https://github.com/wutangnailao/amplitude-analytics-kmp/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/nathanfallet/amplitude-kmp/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/nathanfallet/amplitude-kmp/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/nathanfallet/amplitude-kmp/compare/1.0.1...1.0.2

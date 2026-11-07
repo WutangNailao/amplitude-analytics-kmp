@@ -361,7 +361,7 @@ entry point exposes completion of all uploads; `flush()` requests background wor
 Swift's internal pipeline completion callback is not a public Objective-C API and
 does not justify advertising a shared wait-for-all-upload-success operation.
 
-See [Unreleased changes](../CHANGELOG.md#unreleased) for migration details.
+See the [1.1.0 release notes](../CHANGELOG.md#110---2026-11-07) for migration details.
 
 ## 7. Intentional Omissions and Previously Fixed Issues
 
