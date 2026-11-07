@@ -33,8 +33,7 @@ public expect class Amplitude {
          *
          * Note: The Android SDK's initialization is asynchronous. The instance is returned
          * immediately, but the internal build process completes in the background.
-         * To ensure the SDK is fully initialized before tracking events, use the suspend
-         * function `awaitInitialization()` or the callback-based `onInitialized()`.
+         * The wrapper does not expose an initialization-completion await or callback API.
          */
         public operator fun invoke(configuration: Configuration): Amplitude
     }

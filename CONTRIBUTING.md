@@ -26,7 +26,6 @@ amplitude-analytics-kmp/
 │   │   │       ├── Configuration.kt
 │   │   │       ├── events/        # Event models
 │   │   │       ├── plugins/       # Plugin system
-│   │   │       ├── ktx/           # Coroutines extensions
 │   │   │       └── utils/         # Utilities
 │   │   ├── androidMain/           # Android implementation and type mappers
 │   │   ├── iosMain/               # iOS implementation and type converters

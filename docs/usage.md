@@ -364,45 +364,14 @@ amplitude.flush()
 
 ## Advanced Features
 
-### Coroutines Support
+### Asynchronous Operations
 
-Optional suspend function extensions for async operations:
-
-```kotlin
-import com.amplitude.kmp.ktx.*
-
-suspend fun trackUserJourney() {
-    // Track with Result return type
-    amplitude.awaitTrack(
-        eventType = "Signup Started",
-        eventProperties = mapOf("source" to "homepage")
-    ).onSuccess {
-        println("Event tracked!")
-    }.onFailure { error ->
-        println("Failed: ${error.message}")
-    }
-
-    // Identify user
-    val identify = Identify()
-        .set("email", "user@example.com")
-        .set("signup_date", System.currentTimeMillis())
-    amplitude.awaitIdentify(identify)
-
-    // Track revenue
-    val revenue = Revenue()
-    revenue.price = 49.99
-    revenue.productId = "premium_plan"
-    amplitude.awaitRevenue(revenue)
-
-    // Request a flush; this does not wait for uploads to complete
-    amplitude.flush()
-
-    // Other suspend operations
-    amplitude.awaitSetUserId("user_123")
-    amplitude.awaitSetDeviceId("device_456")
-    amplitude.awaitReset()
-}
-```
+The wrapper does not provide `await*` coroutine convenience APIs. Use `track()`,
+`identify()`, `revenue()`, `setUserId()`, `setDeviceId()`, and `reset()` directly.
+These calls do not add a wait-for-completion guarantee. Use the optional callback
+on `track(BaseEvent, options, callback)` when an event result is needed; the wrapper
+does not convert callbacks to suspend functions. `flush()` requests background
+uploads without waiting for the entire queue to finish.
 
 ### Plugin System
 

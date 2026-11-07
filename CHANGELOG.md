@@ -2,6 +2,19 @@
 
 Notable changes to amplitude-analytics-kmp are documented here.
 
+## [Unreleased]
+
+### Breaking changes
+
+- Remove KMP-only coroutine extensions: both `awaitTrack()` overloads, both
+  `awaitIdentify()` overloads, `awaitRevenue()`, `awaitSetUserId()`,
+  `awaitSetDeviceId()`, and `awaitReset()`. Use `track()` (with its optional event
+  callback), `identify()`, `revenue()`, `setUserId()`, `setDeviceId()`, and `reset()`
+  instead. Remove imports from `com.amplitude.kmp.ktx`.
+- Remove Android-only `Amplitude.invokeAndAwait()` and `awaitInitialization()`
+  convenience APIs. Construct instances with `Amplitude(configuration)`; Android
+  initialization remains asynchronous, with no KMP completion-wait API.
+
 ## [1.0.6] - 2026-10-29
 
 ### Compatibility

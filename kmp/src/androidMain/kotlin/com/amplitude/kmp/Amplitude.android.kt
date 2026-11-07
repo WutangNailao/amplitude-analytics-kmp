@@ -42,21 +42,6 @@ public actual class Amplitude internal constructor(
         }
 
         /**
-         * Initialize Amplitude with Configuration and wait for build to complete.
-         * This is the recommended way to initialize if you want to ensure the SDK
-         * is fully ready before tracking events.
-         */
-        public suspend fun invokeAndAwait(configuration: Configuration): Amplitude {
-            val androidConfig = configuration.toAndroidConfiguration()
-            val androidInstance = AndroidAmplitude(androidConfig)
-
-            // Wait for build to complete
-            androidInstance.isBuilt.await()
-
-            return Amplitude(androidInstance)
-        }
-
-        /**
          * Initialize Amplitude with DSL-style configuration.
          * Maintains API compatibility with Android SDK's factory function.
          */
@@ -162,18 +147,6 @@ public actual class Amplitude internal constructor(
     public actual fun reset(): Amplitude {
         androidAmplitude.reset()
         return this
-    }
-
-    /**
-     * Wait for the SDK to complete its asynchronous initialization.
-     *
-     * This ensures that the plugin pipeline (including AndroidContextPlugin)
-     * is fully set up before tracking events.
-     *
-     * @return true if build completed successfully, false otherwise
-     */
-    public suspend fun awaitInitialization(): Boolean {
-        return androidAmplitude.isBuilt.await()
     }
 
     /**

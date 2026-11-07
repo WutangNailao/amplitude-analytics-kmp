@@ -20,7 +20,6 @@ conventions; platform differences and unsupported legacy APIs are documented in 
 - **Event tracking** with event properties and callbacks
 - **User properties** through the type-safe Identify API
 - **Revenue tracking** and group operations
-- **Coroutines support** through suspend function extensions
 - **Custom plugins**, with documented iOS limitations
 - **Session management**, automatic capture, and offline event queueing
 
