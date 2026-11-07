@@ -34,6 +34,7 @@ conventions; platform differences and unsupported legacy APIs are documented in 
 ## Documentation
 
 - [Usage Guide](docs/usage.md) — installation, quick start, configuration, API examples, migration, and troubleshooting
+- [Native SDK Compatibility](docs/api-compatibility.md) — Android/iOS API coverage, behavior differences, and wrapper gaps
 - [Known Limitations](docs/known-limitations.md) — iOS plugin and callback restrictions
 - [Contributing](CONTRIBUTING.md) — project structure, building, testing, publishing, and contributing
 - [Changelog](CHANGELOG.md) — release notes and migration information
@@ -44,8 +45,8 @@ conventions; platform differences and unsupported legacy APIs are documented in 
 
 The current build declares these native SDK versions:
 
-- **Android**: [`com.amplitude:analytics-android:1.22.4`](https://github.com/amplitude/Amplitude-Kotlin)
-- **iOS**: [`AmplitudeSwift ~> 1.16.2`](https://github.com/amplitude/Amplitude-Swift) through CocoaPods
+- **Android**: [`com.amplitude:analytics-android:1.23.1`](https://github.com/amplitude/Amplitude-Kotlin)
+- **iOS**: [`AmplitudeSwift ~> 1.16.6`](https://github.com/amplitude/Amplitude-Swift) through CocoaPods
 
 See [gradle/libs.versions.toml](gradle/libs.versions.toml) for the version catalog.
 The iOS constraint permits compatible patch releases; the resolved version depends on the CocoaPods lockfile.

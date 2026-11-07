@@ -40,15 +40,12 @@ dependencies {
 }
 ```
 
-### iOS - Swift Package Manager (Recommended)
+### iOS - CocoaPods
 
-The KMP SDK wraps the native Amplitude Swift SDK. Add it via SPM in your Xcode project:
-
-1. In Xcode: **File → Add Package Dependencies**
-2. Enter: `https://github.com/amplitude/Amplitude-Swift`
-3. Version: 1.16.2
-
-Then add your Kotlin framework to the Xcode project via Gradle's `embedAndSignAppleFrameworkForXcode` task.
+The current KMP build uses CocoaPods to integrate `AmplitudeSwift ~> 1.16.6`.
+Install CocoaPods and link the native dependency through the consuming app's
+CocoaPods integration. Adding the Swift package through SPM alone does not replace
+this build's CocoaPods dependency setup.
 
 ## Quick Start
 
@@ -155,7 +152,8 @@ class MyApplication : Application() {
 }
 ```
 
-**iOS**: No additional setup needed! Just use the shared Kotlin code.
+**iOS**: After completing the CocoaPods integration above, use the shared Kotlin code;
+no Android Context is required.
 
 ## Core Features
 
@@ -521,7 +519,9 @@ amplitude.track("Custom Event", properties, options)
 
 ## Migration from Android SDK
 
-The KMP SDK maintains **100% API compatibility** with the Android SDK. Migration requires **ONLY import changes**.
+The KMP API follows Android SDK conventions, but it is not a complete native API mirror.
+Review [Native SDK Compatibility](api-compatibility.md) before migrating, especially
+when using custom plugins, runtime configuration, or deprecated APIs.
 
 ### Step 1: Update Dependencies
 
@@ -543,7 +543,7 @@ import com.amplitude.core.events.Identify
 import com.amplitude.core.events.Revenue
 import com.amplitude.core.events.BaseEvent
 
-// After (KMP SDK) - ONLY CHANGE NEEDED
+// After (KMP SDK)
 import com.amplitude.kmp.Amplitude
 import com.amplitude.kmp.Configuration
 import com.amplitude.kmp.events.Identify
@@ -553,10 +553,10 @@ import com.amplitude.kmp.events.BaseEvent
 
 ### Step 3: Done!
 
-Your code works identically:
+Common tracking calls retain similar usage:
 
 ```kotlin
-// This code is IDENTICAL for both SDKs
+// Common tracking APIs use the same calling style
 val amplitude = Amplitude(apiKey = "KEY", context = context)
 
 amplitude.track("Button Clicked", mapOf("color" to "blue"))
@@ -575,7 +575,7 @@ amplitude.revenue(revenue)
 amplitude.setUserId("user_123").flush()
 ```
 
-**No other changes required!** 🎉
+Review the migration checklist and platform differences before considering migration complete.
 
 ### Migration Checklist
 
@@ -727,18 +727,25 @@ Amplitude(apiKey, activityContext)
 
 ## Known Issues & API Compatibility
 
+See [Native SDK and KMP Compatibility](api-compatibility.md) for the versioned comparison
+of Android/iOS native APIs, missing wrapper capabilities, and behavior differences.
+
 See [Known Limitations](known-limitations.md) for the current iOS custom plugin
 property-loss limitation, its interoperability constraints, and recommended usage.
+The [iOS callback property-map limitation](known-limitations.md#ios-callback-event-properties)
+also remains unresolved: per-event and global callbacks do not reconstruct the four
+property maps or `extra`. This does not itself mean those properties are absent
+from uploaded events. No additional Swift bridge or fork is currently required.
 
 Report other compatibility issues through [GitHub Issues](https://github.com/wutangnailao/amplitude-analytics-kmp/issues).
 
-### Our Commitment: 100% API Compatibility
+### Reporting Compatibility Issues
 
-**Goal**: The KMP SDK must have **identical API** to the Android SDK. Migration should require **ONLY import changes** -
-no code modifications.
+Some differences are intentional, some originate in native platform APIs, and others
+are wrapper gaps. Refer to the compatibility report for their classification and
+the exact native versions examined. Import-only migration is not guaranteed.
 
-If you encounter **any API differences** after migrating from the Android SDK (beyond the known issues listed in the
-limitations linked above), please:
+If you encounter an undocumented difference, please:
 
 1. **Report it immediately** by [opening an issue](https://github.com/wutangnailao/amplitude-analytics-kmp/issues)
 2. Include:
@@ -746,18 +753,6 @@ limitations linked above), please:
     - Code that fails/differs in KMP SDK
     - Expected behavior vs actual behavior
     - Android SDK version you're migrating from
-
-We treat API compatibility breaks as **critical bugs** and will fix them with high priority.
-
-**Expected**: Change imports only, everything else stays the same
-
-```
-// ONLY these should change:
-import com.amplitude.android.* → import com.amplitude.kmp.*
-import com.amplitude.core.* → import com.amplitude.kmp.*
-```
-
-**Not Expected**: Any code changes, refactoring, or API adjustments
 
 ## API Reference
 

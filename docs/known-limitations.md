@@ -2,6 +2,8 @@
 
 [Project overview](../README.md) · [Usage guide](usage.md)
 
+For the broader versioned API comparison, see [Native SDK and KMP Compatibility](api-compatibility.md).
+
 ## iOS custom plugin property loss
 
 > **Warning:** Custom KMP plugins registered with `amplitude.add(plugin)` can cause event
@@ -10,7 +12,9 @@
 
 ### Scope
 
-This document describes the current KMP adapter with Amplitude-Swift **v1.16.2**.
+This document describes the current KMP adapter with the declared Amplitude-Swift
+constraint **`~> 1.16.6`**. Source inspection confirms that the Objective-C property
+wrapper in **v1.16.6** retains the limitation originally audited in **v1.16.2**.
 
 This limitation affects events processed by custom KMP plugins through the iOS
 `PluginMapper.kt` adapter. It is not a general limitation of event tracking without
@@ -60,7 +64,8 @@ user and group properties can also affect user-property updates and group analys
 The official Amplitude-Swift SDK provides an Objective-C wrapper named
 `AMPProperties`. Its public interface supports reading, writing, and removing a
 value **by a known key**, but does not expose all keys, iteration, or a dictionary
-snapshot. This has been verified in the currently used Amplitude-Swift v1.16.2.
+snapshot. This interface limitation is present in both audited versions, v1.16.2
+and v1.16.6.
 
 Kotlin/Native cinterop generates bindings to that Objective-C interface. It cannot
 automatically expose the underlying Swift dictionaries or discover unknown keys.
@@ -106,6 +111,7 @@ However, `eventProperties`, `userProperties`, `groups`, and `groupProperties` re
 above prevents reconstructing these maps. This affects per-event callbacks and the
 global configuration callback, even when no custom KMP plugin is registered. The
 callback conversion does not itself remove properties from the event sent to the server.
+The callback's `extra` map is also not reconstructed by the current iOS mapper.
 
 Use the event type or insert ID to identify the callback event. If the application
 needs the originally supplied properties in a per-event callback, retain them in
@@ -116,8 +122,37 @@ The native SDK declares the callback event as non-null. If an unexpected null ev
 arrives through interop, the KMP callback is not invoked rather than receiving a
 fabricated event.
 
+### Current status and bridge boundary
+
+**Unresolved; deferred.** The current SDK continues to use the official native
+dependency and its public Objective-C interfaces. No additional Swift bridge,
+SDK instance, callback-interception plugin, or fork is introduced to work around
+this limitation.
+
+Swift callbacks can read the underlying event dictionaries, but Kotlin/Native's
+current cinterop integration only sees the Objective-C wrapper. That wrapper's
+underlying Swift event is `internal`, and the underlying Swift SDK instance in
+`ObjCAmplitude` is `private`. An extension in a separate Swift module cannot
+access those members merely by adding an `@objc` method. A standalone bridge
+therefore cannot directly extract complete dictionaries from the existing
+callback wrapper using the current public interfaces.
+
+Do not treat retained input properties as the final callback payload: native
+processing may add, change, or remove properties. The library does not use cached
+input, reflection, or private-member access to fabricate a complete result.
+
+A future fix could add a public dictionary snapshot/key-enumeration API to the
+upstream Objective-C property wrapper, or use a maintained fork with that change.
+Either approach also requires updating the KMP mapping and validating downstream
+native dependency integration. Neither is implemented or required by the current
+release. This callback limitation is separate from the custom-plugin property
+loss described above; do not infer that ordinary uploads lose their properties.
+
 ## References
 
 - [Current KMP adapter](../kmp/src/iosMain/kotlin/com/amplitude/kmp/mappings/ios/PluginMapper.kt)
 - [Amplitude-Swift v1.16.2 Objective-C property wrapper](https://github.com/amplitude/Amplitude-Swift/blob/v1.16.2/Sources/Amplitude/ObjC/ObjCProperties.swift)
 - [Amplitude-Swift v1.16.2 Objective-C event wrapper](https://github.com/amplitude/Amplitude-Swift/blob/v1.16.2/Sources/Amplitude/ObjC/ObjCBaseEvent.swift)
+- [Amplitude-Swift v1.16.6 Objective-C property wrapper](https://github.com/amplitude/Amplitude-Swift/blob/v1.16.6/Sources/Amplitude/ObjC/ObjCProperties.swift)
+- [Amplitude-Swift v1.16.6 Objective-C event wrapper](https://github.com/amplitude/Amplitude-Swift/blob/v1.16.6/Sources/Amplitude/ObjC/ObjCBaseEvent.swift)
+- [Amplitude-Swift v1.16.6 Objective-C SDK wrapper](https://github.com/amplitude/Amplitude-Swift/blob/v1.16.6/Sources/Amplitude/ObjC/ObjCAmplitude.swift)
