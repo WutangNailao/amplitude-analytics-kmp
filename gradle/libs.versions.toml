@@ -9,8 +9,8 @@ ktlintEngine = "1.0.1"
 mavenPublish = "0.37.0"
 
 # Native SDK Dependencies
-amplitudeAndroid = "1.22.4"
-amplitudeSwift = "1.16.2"
+amplitudeAndroid = "1.23.1"
+amplitudeSwift = "1.16.6"
 
 # Kotlin Libraries
 coroutines = "1.10.1"
