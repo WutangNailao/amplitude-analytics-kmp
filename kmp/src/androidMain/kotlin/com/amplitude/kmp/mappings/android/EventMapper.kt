@@ -119,20 +119,65 @@ internal fun EventOptions.toAndroidEventOptions(): AndroidEventOptions {
  */
 internal fun EventCallBack.toAndroidCallback(): AndroidEventCallBack {
     return { event, status, message ->
-        // Convert Android BaseEvent back to KMP BaseEvent for callback
-        val kmpEvent =
-            BaseEvent(
-                eventType = event.eventType,
-                eventProperties = event.eventProperties,
-                userProperties = event.userProperties,
-                groups = event.groups,
-                groupProperties = event.groupProperties,
-            ).apply {
-                event.userId?.let { this.userId = it }
-                event.deviceId?.let { this.deviceId = it }
-                event.timestamp?.let { this.timestamp = it }
+        this(event.toKmpBaseEvent(), status, message)
+    }
+}
+
+/**
+ * Map public Android event fields to the shared callback model.
+ * Native subclass identity and internal retry state are not part of this mapping.
+ */
+internal fun AndroidBaseEvent.toKmpBaseEvent(): BaseEvent {
+    return BaseEvent(
+        eventType = eventType,
+        eventProperties = eventProperties,
+        userProperties = userProperties,
+        groups = groups,
+        groupProperties = groupProperties,
+    ).apply {
+        userId = this@toKmpBaseEvent.userId
+        deviceId = this@toKmpBaseEvent.deviceId
+        timestamp = this@toKmpBaseEvent.timestamp
+        eventId = this@toKmpBaseEvent.eventId
+        sessionId = this@toKmpBaseEvent.sessionId
+        insertId = this@toKmpBaseEvent.insertId
+        locationLat = this@toKmpBaseEvent.locationLat
+        locationLng = this@toKmpBaseEvent.locationLng
+        appVersion = this@toKmpBaseEvent.appVersion
+        versionName = this@toKmpBaseEvent.versionName
+        platform = this@toKmpBaseEvent.platform
+        osName = this@toKmpBaseEvent.osName
+        osVersion = this@toKmpBaseEvent.osVersion
+        deviceBrand = this@toKmpBaseEvent.deviceBrand
+        deviceManufacturer = this@toKmpBaseEvent.deviceManufacturer
+        deviceModel = this@toKmpBaseEvent.deviceModel
+        carrier = this@toKmpBaseEvent.carrier
+        country = this@toKmpBaseEvent.country
+        region = this@toKmpBaseEvent.region
+        city = this@toKmpBaseEvent.city
+        dma = this@toKmpBaseEvent.dma
+        idfa = this@toKmpBaseEvent.idfa
+        idfv = this@toKmpBaseEvent.idfv
+        adid = this@toKmpBaseEvent.adid
+        appSetId = this@toKmpBaseEvent.appSetId
+        androidId = this@toKmpBaseEvent.androidId
+        language = this@toKmpBaseEvent.language
+        library = this@toKmpBaseEvent.library
+        ip = this@toKmpBaseEvent.ip
+        plan = this@toKmpBaseEvent.plan?.let { Plan(it.branch, it.source, it.version, it.versionId) }
+        ingestionMetadata = this@toKmpBaseEvent.ingestionMetadata?.let { IngestionMetadata(it.sourceName, it.sourceVersion) }
+        revenue = this@toKmpBaseEvent.revenue
+        price = this@toKmpBaseEvent.price
+        quantity = this@toKmpBaseEvent.quantity
+        productId = this@toKmpBaseEvent.productId
+        revenueType = this@toKmpBaseEvent.revenueType
+        currency = this@toKmpBaseEvent.currency
+        extra = this@toKmpBaseEvent.extra
+        callback =
+            this@toKmpBaseEvent.callback?.let { nativeCallback ->
+                { event, status, message -> nativeCallback(event.toAndroidBaseEvent(), status, message) }
             }
-        this(kmpEvent, status, message)
+        partnerId = this@toKmpBaseEvent.partnerId
     }
 }
 

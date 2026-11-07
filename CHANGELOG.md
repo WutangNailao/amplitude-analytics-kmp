@@ -17,6 +17,10 @@ Notable changes to amplitude-analytics-kmp are documented here.
 
 ### Fixed
 
+- Preserve independently assigned Revenue receipts and signatures on Android.
+- Preserve all shared public event fields in Android callbacks, including session,
+  device, revenue, plan, ingestion metadata, extra properties, and event callbacks.
+  iOS callback property-map bridge limitations remain unchanged.
 - Preserve `Revenue.receiptSig` when mapping to the native iOS Revenue object.
 - Preserve 64-bit session and Identify batch durations on iOS without narrowing
   through a 32-bit integer.

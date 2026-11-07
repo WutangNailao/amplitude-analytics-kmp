@@ -15,9 +15,8 @@ internal fun Revenue.toAndroidRevenue(): AndroidRevenue {
         this@toAndroidRevenue.currency?.let { this.currency = it }
         this@toAndroidRevenue.revenue?.let { this.revenue = it }
 
-        if (this@toAndroidRevenue.receipt != null && this@toAndroidRevenue.receiptSig != null) {
-            this.setReceipt(this@toAndroidRevenue.receipt!!, this@toAndroidRevenue.receiptSig!!)
-        }
+        this.receipt = this@toAndroidRevenue.receipt
+        this.receiptSig = this@toAndroidRevenue.receiptSig
 
         this@toAndroidRevenue.properties?.let {
             if (it.isNotEmpty()) {
